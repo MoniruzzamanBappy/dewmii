@@ -1,0 +1,25 @@
+class FaqModel {
+  final int id;
+  final String category;
+  final String question;
+  final String answer;
+  final int sortOrder;
+
+  FaqModel({
+    required this.id,
+    required this.category,
+    required this.question,
+    required this.answer,
+    required this.sortOrder,
+  });
+
+  factory FaqModel.fromJson(Map<String, dynamic> json) {
+    return FaqModel(
+      id: json['id'] ?? 0,
+      category: json['category'] ?? '',
+      question: json['question'] ?? '',
+      answer: json['answer'] ?? '',
+      sortOrder: json['sort_order'] ?? 0,
+    );
+  }
+}
