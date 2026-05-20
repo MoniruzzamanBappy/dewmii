@@ -26,22 +26,40 @@ class PaymentResultModel {
   });
 
   factory PaymentResultModel.fromJson(Map<String, dynamic> json) {
+    final data = json['payment'] is Map<String, dynamic>
+        ? json['payment'] as Map<String, dynamic>
+        : json;
+
     return PaymentResultModel(
-      paymentId: json['payment_id'] ?? 0,
-      orderId: json['order_id'] ?? 0,
-      orderNumber: json['order_number'] ?? '',
-      paymentMethod: json['payment_method'] ?? '',
-      amount: json['amount'] ?? json['paid_amount'] ?? 0,
-      currency: json['currency'] ?? 'BDT',
-      transactionId: json['transaction_id'] ?? '',
-      paymentStatus: json['payment_status'] ?? '',
-      paymentUrl: json['payment_url'],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      paidAt: json['paid_at'] != null
-          ? DateTime.tryParse(json['paid_at'])
-          : null,
+      paymentId: _toInt(data['payment_id'] ?? data['id']),
+      orderId: _toInt(data['order_id']),
+      orderNumber: _toString(data['order_number']),
+      paymentMethod: _toString(data['payment_method']),
+      amount: _toNum(data['amount'] ?? data['paid_amount']),
+      currency: _toString(data['currency']).isEmpty ? 'BDT' : _toString(data['currency']),
+      transactionId: _toString(data['transaction_id']),
+      paymentStatus: _toString(data['payment_status'] ?? data['status']),
+      paymentUrl: (data['payment_url'] ?? data['redirect_url'])?.toString(),
+      createdAt: _toDate(data['created_at']),
+      paidAt: _toDate(data['paid_at']),
     );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static num _toNum(dynamic value) {
+    if (value is num) return value;
+    return num.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _toString(dynamic value) => value?.toString() ?? '';
+
+  static DateTime? _toDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

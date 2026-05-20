@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/routes.dart';
 import '../../../shared/widgets/app_toast.dart';
-import '../../home/home_screen.dart';
 import '../services/auth_api_service.dart';
 import '../widgets/auth_text_field.dart';
 import 'forgot_password_screen.dart';
@@ -45,9 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
         type: ToastType.success,
       );
 
-      Navigator.pushAndRemoveUntil(
+      Navigator.pushNamedAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        AppRoutes.main,
         (route) => false,
       );
     } catch (error) {

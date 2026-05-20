@@ -25,17 +25,28 @@ class CategoryModel {
     final childrenJson = json['children'];
 
     return CategoryModel(
-      id: json['id'] ?? 0,
-      parentId: json['parent_id'],
-      name: json['name'] ?? '',
-      slug: json['slug'] ?? '',
-      description: json['description'] ?? '',
-      imageUrl: json['image_url'] ?? '',
-      bannerUrl: json['banner_url'],
-      status: json['status'] ?? '',
+      id: _toInt(json['id']),
+      parentId: json['parent_id'] == null ? null : _toInt(json['parent_id']),
+      name: _toString(json['name']),
+      slug: _toString(json['slug']),
+      description: _toString(json['description']),
+      imageUrl: _toString(json['image_url']),
+      bannerUrl: json['banner_url']?.toString(),
+      status: _toString(json['status']),
       children: childrenJson is List
-          ? childrenJson.map((item) => CategoryModel.fromJson(item)).toList()
+          ? childrenJson
+                .whereType<Map<String, dynamic>>()
+                .map(CategoryModel.fromJson)
+                .toList()
           : [],
     );
   }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _toString(dynamic value) => value?.toString() ?? '';
 }

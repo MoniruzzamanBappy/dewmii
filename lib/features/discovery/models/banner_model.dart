@@ -21,14 +21,22 @@ class BannerModel {
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
     return BannerModel(
-      id: json['id'] ?? 0,
-      title: json['title'] ?? '',
-      subtitle: json['subtitle'] ?? '',
-      imageUrl: json['image_url'] ?? '',
-      position: json['position'],
-      redirectType: json['redirect_type'] ?? '',
-      redirectId: json['redirect_id'] ?? 0,
-      status: json['status'] ?? '',
+      id: _toInt(json['id']),
+      title: _toString(json['title']),
+      subtitle: _toString(json['subtitle']),
+      imageUrl: _toString(json['image_url']),
+      position: json['position']?.toString(),
+      redirectType: _toString(json['redirect_type']),
+      redirectId: _toInt(json['redirect_id']),
+      status: _toString(json['status']),
     );
   }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _toString(dynamic value) => value?.toString() ?? '';
 }

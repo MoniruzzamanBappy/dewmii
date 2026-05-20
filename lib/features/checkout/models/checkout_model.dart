@@ -26,54 +26,41 @@ class CheckoutModel {
 
   factory CheckoutModel.fromJson(Map<String, dynamic> json) {
     final cart = json['cart'];
-    final cartItems = cart is Map<String, dynamic> ? cart['items'] : null;
+    final cartMap = cart is Map<String, dynamic> ? cart : <String, dynamic>{};
+    final itemsJson = json['items'] ?? cartMap['items'];
     final addressesJson = json['addresses'];
-    final shippingJson = json['shipping_methods'];
-    final paymentJson = json['payment_methods'];
-    final couponJson = json['coupon'];
+    final shippingJson = json['shipping_methods'] ?? json['shippingMethods'];
+    final paymentJson = json['payment_methods'] ?? json['paymentMethods'];
+    final couponJson = json['coupon'] ?? cartMap['coupon'];
+    final summaryJson = json['summary'] ?? cartMap['summary'];
 
     return CheckoutModel(
-      cartItems: cartItems is List
-          ? cartItems
-                .map(
-                  (item) =>
-                      CartItemModel.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
+      cartItems: _list(itemsJson, CartItemModel.fromJson),
       defaultAddress: json['default_address'] is Map<String, dynamic>
-          ? AddressModel.fromJson(json['default_address'])
-          : null,
-      addresses: addressesJson is List
-          ? addressesJson
-                .map(
-                  (item) => AddressModel.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
-      shippingMethods: shippingJson is List
-          ? shippingJson
-                .map(
-                  (item) => ShippingMethodModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
-          : [],
-      paymentMethods: paymentJson is List
-          ? paymentJson
-                .map(
-                  (item) =>
-                      PaymentMethodModel.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
+          ? AddressModel.fromJson(json['default_address'] as Map<String, dynamic>)
+          : json['defaultAddress'] is Map<String, dynamic>
+              ? AddressModel.fromJson(json['defaultAddress'] as Map<String, dynamic>)
+              : null,
+      addresses: _list(addressesJson, AddressModel.fromJson),
+      shippingMethods: _list(shippingJson, ShippingMethodModel.fromJson),
+      paymentMethods: _list(paymentJson, PaymentMethodModel.fromJson),
       coupon: couponJson is Map<String, dynamic>
           ? CartCouponModel.fromJson(couponJson)
           : null,
-      summary: CartSummaryModel.fromJson(
-        json['summary'] ?? <String, dynamic>{},
-      ),
+      summary: summaryJson is Map<String, dynamic>
+          ? CartSummaryModel.fromJson(summaryJson)
+          : CartSummaryModel.empty(),
     );
+  }
+
+  static List<T> _list<T>(
+    dynamic value,
+    T Function(Map<String, dynamic>) parser,
+  ) {
+    if (value is! List) return [];
+    return value
+        .whereType<Map>()
+        .map((item) => parser(Map<String, dynamic>.from(item)))
+        .toList();
   }
 }

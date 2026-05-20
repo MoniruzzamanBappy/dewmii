@@ -5,7 +5,7 @@ class FaqModel {
   final String answer;
   final int sortOrder;
 
-  FaqModel({
+  const FaqModel({
     required this.id,
     required this.category,
     required this.question,
@@ -15,11 +15,20 @@ class FaqModel {
 
   factory FaqModel.fromJson(Map<String, dynamic> json) {
     return FaqModel(
-      id: json['id'] ?? 0,
-      category: json['category'] ?? '',
-      question: json['question'] ?? '',
-      answer: json['answer'] ?? '',
-      sortOrder: json['sort_order'] ?? 0,
+      id: _toInt(json['id']),
+      category: _toStringValue(json['category']),
+      question: _toStringValue(json['question']),
+      answer: _toStringValue(json['answer']),
+      sortOrder: _toInt(json['sort_order'] ?? json['sortOrder']),
     );
   }
 }
+
+int _toInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+String _toStringValue(dynamic value) => value?.toString() ?? '';

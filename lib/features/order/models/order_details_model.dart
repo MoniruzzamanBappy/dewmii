@@ -7,7 +7,7 @@ class OrderAddressModel {
   final String addressLine;
   final String postalCode;
 
-  OrderAddressModel({
+  const OrderAddressModel({
     required this.name,
     required this.phone,
     required this.division,
@@ -19,18 +19,21 @@ class OrderAddressModel {
 
   factory OrderAddressModel.fromJson(Map<String, dynamic> json) {
     return OrderAddressModel(
-      name: json['name'] ?? '',
-      phone: json['phone'] ?? '',
-      division: json['division'] ?? '',
-      city: json['city'] ?? '',
-      area: json['area'] ?? '',
-      addressLine: json['address_line'] ?? '',
-      postalCode: json['postal_code'] ?? '',
+      name: _Json.stringValue(json['name'] ?? json['full_name']),
+      phone: _Json.stringValue(json['phone'] ?? json['phone_number']),
+      division: _Json.stringValue(json['division'] ?? json['state']),
+      city: _Json.stringValue(json['city']),
+      area: _Json.stringValue(json['area'] ?? json['zone']),
+      addressLine: _Json.stringValue(json['address_line'] ?? json['addressLine'] ?? json['address']),
+      postalCode: _Json.stringValue(json['postal_code'] ?? json['postalCode'] ?? json['zip']),
     );
   }
 
   String get fullAddress {
-    return '$addressLine, $area, $city, $division - $postalCode';
+    final parts = [addressLine, area, city, division, postalCode]
+        .where((item) => item.trim().isNotEmpty)
+        .toList();
+    return parts.isEmpty ? 'No address available' : parts.join(', ');
   }
 }
 
@@ -46,7 +49,7 @@ class OrderDetailsItemModel {
   final num price;
   final num subtotal;
 
-  OrderDetailsItemModel({
+  const OrderDetailsItemModel({
     required this.id,
     required this.productId,
     this.variantId,
@@ -61,16 +64,16 @@ class OrderDetailsItemModel {
 
   factory OrderDetailsItemModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailsItemModel(
-      id: json['id'] ?? 0,
-      productId: json['product_id'] ?? 0,
-      variantId: json['variant_id'],
-      name: json['name'] ?? '',
-      thumbnail: json['thumbnail'] ?? '',
-      size: json['size'],
-      color: json['color'],
-      quantity: json['quantity'] ?? 0,
-      price: json['price'] ?? 0,
-      subtotal: json['subtotal'] ?? 0,
+      id: _Json.intValue(json['id']),
+      productId: _Json.intValue(json['product_id'] ?? json['productId']),
+      variantId: json['variant_id'] == null ? null : _Json.intValue(json['variant_id']),
+      name: _Json.stringValue(json['name'] ?? json['product_name']),
+      thumbnail: _Json.stringValue(json['thumbnail'] ?? json['image'] ?? json['image_url']),
+      size: _Json.nullableString(json['size']),
+      color: _Json.nullableString(json['color']),
+      quantity: _Json.intValue(json['quantity'], fallback: 1),
+      price: _Json.numValue(json['price']),
+      subtotal: _Json.numValue(json['subtotal'] ?? json['total']),
     );
   }
 }
@@ -94,7 +97,7 @@ class OrderDetailsModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  OrderDetailsModel({
+  const OrderDetailsModel({
     required this.id,
     required this.orderNumber,
     required this.userId,
@@ -116,39 +119,28 @@ class OrderDetailsModel {
 
   factory OrderDetailsModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'];
+    final addressJson = json['address'] ?? json['shipping_address'] ?? json['shippingAddress'];
 
     return OrderDetailsModel(
-      id: json['id'] ?? 0,
-      orderNumber: json['order_number'] ?? '',
-      userId: json['user_id'] ?? 0,
-      status: json['status'] ?? '',
-      paymentStatus: json['payment_status'] ?? '',
-      paymentMethod: json['payment_method'] ?? '',
-      subtotal: json['subtotal'] ?? 0,
-      discount: json['discount'] ?? 0,
-      shippingCharge: json['shipping_charge'] ?? 0,
-      tax: json['tax'] ?? 0,
-      total: json['total'] ?? 0,
-      currency: json['currency'] ?? 'BDT',
-      note: json['note'] ?? '',
-      address: OrderAddressModel.fromJson(
-        json['address'] ?? <String, dynamic>{},
-      ),
+      id: _Json.intValue(json['id'] ?? json['order_id']),
+      orderNumber: _Json.stringValue(json['order_number'] ?? json['orderNumber']),
+      userId: _Json.intValue(json['user_id'] ?? json['userId']),
+      status: _Json.stringValue(json['status'], fallback: 'pending'),
+      paymentStatus: _Json.stringValue(json['payment_status'] ?? json['paymentStatus'], fallback: 'unpaid'),
+      paymentMethod: _Json.stringValue(json['payment_method'] ?? json['paymentMethod'], fallback: 'cash'),
+      subtotal: _Json.numValue(json['subtotal']),
+      discount: _Json.numValue(json['discount']),
+      shippingCharge: _Json.numValue(json['shipping_charge'] ?? json['shippingCharge']),
+      tax: _Json.numValue(json['tax']),
+      total: _Json.numValue(json['total'] ?? json['grand_total']),
+      currency: _Json.stringValue(json['currency'], fallback: 'BDT'),
+      note: _Json.stringValue(json['note']),
+      address: OrderAddressModel.fromJson(addressJson is Map<String, dynamic> ? addressJson : <String, dynamic>{}),
       items: itemsJson is List
-          ? itemsJson
-                .map(
-                  (item) => OrderDetailsItemModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
+          ? itemsJson.whereType<Map<String, dynamic>>().map(OrderDetailsItemModel.fromJson).toList()
           : [],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      createdAt: _Json.dateValue(json['created_at'] ?? json['createdAt']),
+      updatedAt: _Json.dateValue(json['updated_at'] ?? json['updatedAt']),
     );
   }
 
@@ -172,5 +164,36 @@ class OrderDetailsModel {
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
+  }
+}
+
+class _Json {
+  static int intValue(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? fallback;
+    return fallback;
+  }
+
+  static num numValue(dynamic value) {
+    if (value is num) return value;
+    if (value is String) return num.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static String stringValue(dynamic value, {String fallback = ''}) {
+    final text = value?.toString().trim();
+    return text == null || text.isEmpty ? fallback : text;
+  }
+
+  static String? nullableString(dynamic value) {
+    final text = value?.toString().trim();
+    return text == null || text.isEmpty ? null : text;
+  }
+
+  static DateTime? dateValue(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 }

@@ -31,24 +31,33 @@ class AddressModel {
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
     return AddressModel(
-      id: json['id'] ?? 0,
-      userId: json['user_id'] ?? 0,
-      name: json['name'] ?? '',
-      phone: json['phone'] ?? '',
-      division: json['division'] ?? '',
-      city: json['city'] ?? '',
-      area: json['area'] ?? '',
-      addressLine: json['address_line'] ?? '',
-      postalCode: json['postal_code'] ?? '',
-      type: json['type'] ?? 'home',
-      isDefault: json['is_default'] ?? false,
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      id: _toInt(json['id']),
+      userId: _toInt(json['user_id'] ?? json['userId']),
+      name: _toString(json['name']),
+      phone: _toString(json['phone'] ?? json['phone_number']),
+      division: _toString(json['division']),
+      city: _toString(json['city']),
+      area: _toString(json['area']),
+      addressLine: _toString(json['address_line'] ?? json['addressLine'] ?? json['address']),
+      postalCode: _toString(json['postal_code'] ?? json['postalCode']),
+      type: _toString(json['type']).isEmpty ? 'home' : _toString(json['type']),
+      isDefault: _toBool(json['is_default'] ?? json['isDefault']),
+      createdAt: _toDate(json['created_at'] ?? json['createdAt']),
+      updatedAt: _toDate(json['updated_at'] ?? json['updatedAt']),
     );
+  }
+
+  String get fullAddress {
+    final parts = [addressLine, area, city, division, postalCode]
+        .where((item) => item.trim().isNotEmpty)
+        .toList();
+    return parts.isEmpty ? 'No address details' : parts.join(', ');
+  }
+
+  String get typeLabel {
+    if (type.toLowerCase() == 'office') return 'Office';
+    if (type.toLowerCase() == 'other') return 'Other';
+    return 'Home';
   }
 
   AddressModel copyWith({
@@ -83,7 +92,39 @@ class AddressModel {
     );
   }
 
-  String get fullAddress {
-    return '$addressLine, $area, $city, $division - $postalCode';
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'name': name,
+      'phone': phone,
+      'division': division,
+      'city': city,
+      'area': area,
+      'address_line': addressLine,
+      'postal_code': postalCode,
+      'type': type,
+      'is_default': isDefault,
+    };
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _toString(dynamic value) => value?.toString() ?? '';
+
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final text = value?.toString().toLowerCase().trim();
+    return text == 'true' || text == '1' || text == 'yes';
+  }
+
+  static DateTime? _toDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

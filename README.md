@@ -1,17 +1,14 @@
-# dewmii
+# Dewmii Modernized Shared App Files
 
-A new Flutter project.
+Updated files:
 
-## Getting Started
+- `main.dart` - initializes Flutter binding and theme controller before app start.
+- `app.dart` - adds app string title, bounded text scaling, and smooth scrolling behavior.
+- `theme_controller.dart` - keeps the same static API with cleaner labels and toggle helpers.
+- `common_app_header.dart` - glass/blur header, animated title, animated icon buttons, theme toggle, notification badge, support action.
+- `common_bottom_nav.dart` - floating glass bottom navigation, sliding active indicator, badge animation, haptics.
+- `main_navigation_shell.dart` - animated tab switching, state preservation with PageStorage, back-to-home behavior.
+- `routes.dart` - route transition helpers and tab routes opening the main shell with the correct selected tab.
+- `app_toast.dart` - now follows the app theme controller instead of only platform brightness.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Replace the matching files in your project path. Keep your existing folder structure and imports.

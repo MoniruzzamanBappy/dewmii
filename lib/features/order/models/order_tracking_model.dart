@@ -5,7 +5,7 @@ class OrderTrackingEventModel {
   final DateTime? date;
   final bool isCompleted;
 
-  OrderTrackingEventModel({
+  const OrderTrackingEventModel({
     required this.status,
     required this.title,
     required this.description,
@@ -15,11 +15,11 @@ class OrderTrackingEventModel {
 
   factory OrderTrackingEventModel.fromJson(Map<String, dynamic> json) {
     return OrderTrackingEventModel(
-      status: json['status'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
-      isCompleted: json['is_completed'] ?? false,
+      status: _Json.stringValue(json['status']),
+      title: _Json.stringValue(json['title'], fallback: 'Order update'),
+      description: _Json.stringValue(json['description']),
+      date: _Json.dateValue(json['date'] ?? json['created_at']),
+      isCompleted: _Json.boolValue(json['is_completed'] ?? json['completed']),
     );
   }
 }
@@ -34,7 +34,7 @@ class OrderTrackingModel {
   final DateTime? estimatedDeliveryDate;
   final List<OrderTrackingEventModel> events;
 
-  OrderTrackingModel({
+  const OrderTrackingModel({
     required this.orderId,
     required this.orderNumber,
     required this.currentStatus,
@@ -46,27 +46,45 @@ class OrderTrackingModel {
   });
 
   factory OrderTrackingModel.fromJson(Map<String, dynamic> json) {
-    final eventsJson = json['events'];
-
+    final eventsJson = json['events'] ?? json['timeline'];
     return OrderTrackingModel(
-      orderId: json['order_id'] ?? 0,
-      orderNumber: json['order_number'] ?? '',
-      currentStatus: json['current_status'] ?? '',
-      trackingNumber: json['tracking_number'] ?? '',
-      courierName: json['courier_name'] ?? '',
-      trackingUrl: json['tracking_url'] ?? '',
-      estimatedDeliveryDate: json['estimated_delivery_date'] != null
-          ? DateTime.tryParse(json['estimated_delivery_date'])
-          : null,
+      orderId: _Json.intValue(json['order_id'] ?? json['orderId']),
+      orderNumber: _Json.stringValue(json['order_number'] ?? json['orderNumber']),
+      currentStatus: _Json.stringValue(json['current_status'] ?? json['currentStatus'], fallback: 'pending'),
+      trackingNumber: _Json.stringValue(json['tracking_number'] ?? json['trackingNumber']),
+      courierName: _Json.stringValue(json['courier_name'] ?? json['courierName']),
+      trackingUrl: _Json.stringValue(json['tracking_url'] ?? json['trackingUrl']),
+      estimatedDeliveryDate: _Json.dateValue(json['estimated_delivery_date'] ?? json['estimatedDeliveryDate']),
       events: eventsJson is List
-          ? eventsJson
-                .map(
-                  (item) => OrderTrackingEventModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
+          ? eventsJson.whereType<Map<String, dynamic>>().map(OrderTrackingEventModel.fromJson).toList()
           : [],
     );
+  }
+}
+
+class _Json {
+  static int intValue(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static bool boolValue(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) return ['true', '1', 'yes', 'completed', 'done'].contains(value.toLowerCase().trim());
+    return false;
+  }
+
+  static String stringValue(dynamic value, {String fallback = ''}) {
+    final text = value?.toString().trim();
+    return text == null || text.isEmpty ? fallback : text;
+  }
+
+  static DateTime? dateValue(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 }

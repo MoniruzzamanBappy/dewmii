@@ -14,124 +14,125 @@ class WriteReviewScreen extends StatefulWidget {
 }
 
 class _WriteReviewScreenState extends State<WriteReviewScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _commentController = TextEditingController();
   final ProductApiService service = ProductApiService();
-  final commentController = TextEditingController();
 
   int rating = 5;
-  bool isLoading = false;
-
-  Future<void> submitReview() async {
-    if (commentController.text.trim().isEmpty) {
-      AppToast.show(
-        context,
-        message: 'Please write your review',
-        type: ToastType.warning,
-      );
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final response = await service.addReviewDemo(
-        productId: widget.productId,
-        rating: rating,
-        comment: commentController.text.trim(),
-      );
-
-      if (!mounted) return;
-
-      AppToast.show(
-        context,
-        message: response['message'] ?? 'Review submitted successfully',
-        type: ToastType.success,
-      );
-
-      Navigator.pop(context, true);
-    } catch (error) {
-      if (!mounted) return;
-
-      AppToast.show(
-        context,
-        message: error.toString().replaceAll('Exception: ', ''),
-        type: ToastType.error,
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
+  bool isSubmitting = false;
 
   @override
   void dispose() {
-    commentController.dispose();
+    _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> submitReview() async {
+    if (!_formKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
+    setState(() => isSubmitting = true);
+    try {
+      final result = await service.addReviewDemo(productId: widget.productId, rating: rating, comment: _commentController.text.trim());
+      if (!mounted) return;
+      AppToast.show(context, message: result['message']?.toString() ?? 'Review submitted', type: ToastType.success);
+      Navigator.pop(context, true);
+    } catch (error) {
+      if (!mounted) return;
+      AppToast.show(context, message: error.toString().replaceAll('Exception: ', ''), type: ToastType.error);
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Write Review')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Your Rating',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: List.generate(5, (index) {
-              final star = index + 1;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
-              return IconButton(
-                onPressed: () {
-                  setState(() {
-                    rating = star;
-                  });
-                },
-                icon: Icon(
-                  star <= rating
-                      ? Icons.star_rounded
-                      : Icons.star_border_rounded,
-                  color: AppColors.warning,
-                  size: 34,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Write Review'), centerTitle: true),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(18, 10, 18, 18),
+        child: FilledButton.icon(
+          onPressed: isSubmitting ? null : submitReview,
+          icon: isSubmitting
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.send_rounded),
+          label: Text(isSubmitting ? 'Submitting...' : 'Submit Review'),
+          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(54), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(18),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(22),
+                decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(28)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 34),
+                    const SizedBox(height: 14),
+                    Text('How was the product?', style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
+                    const SizedBox(height: 6),
+                    const Text('Your feedback helps other shoppers choose confidently.', style: TextStyle(color: Colors.white70, height: 1.35)),
+                  ],
                 ),
-              );
-            }),
+              ),
+              const SizedBox(height: 24),
+              Text('Your rating', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: scheme.outlineVariant.withOpacity(.55))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    final selected = index < rating;
+                    return IconButton(
+                      tooltip: '${index + 1} star',
+                      onPressed: () => setState(() => rating = index + 1),
+                      icon: AnimatedScale(
+                        duration: const Duration(milliseconds: 180),
+                        scale: selected ? 1.18 : 1,
+                        child: Icon(selected ? Icons.star_rounded : Icons.star_border_rounded, size: 34, color: AppColors.warning),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 22),
+              Text('Review details', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900)),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _commentController,
+                minLines: 5,
+                maxLines: 7,
+                keyboardType: TextInputType.multiline,
+                textInputAction: TextInputAction.newline,
+                decoration: InputDecoration(
+                  hintText: 'Tell us about quality, fit, delivery, packaging...',
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(bottom: 92),
+                    child: Icon(Icons.notes_rounded),
+                  ),
+                  filled: true,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
+                ),
+                validator: (value) {
+                  final text = value?.trim() ?? '';
+                  if (text.length < 8) return 'Please write at least 8 characters.';
+                  return null;
+                },
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Review',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: commentController,
-            minLines: 5,
-            maxLines: 8,
-            decoration: const InputDecoration(
-              hintText: 'Write your experience with this product...',
-              alignLabelWithHint: true,
-            ),
-          ),
-          const SizedBox(height: 28),
-          ElevatedButton(
-            onPressed: isLoading ? null : submitReview,
-            child: isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2.4),
-                  )
-                : const Text('Submit Review'),
-          ),
-        ],
+        ),
       ),
     );
   }

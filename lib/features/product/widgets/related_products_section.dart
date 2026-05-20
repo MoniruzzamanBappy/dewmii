@@ -24,26 +24,13 @@ class _RelatedProductsSectionState extends State<RelatedProductsSection> {
   Future<void> fetchRelated() async {
     try {
       final result = await service.getRelatedProducts(widget.productId);
-
       if (!mounted) return;
-
-      setState(() {
-        products = result;
-      });
+      setState(() => products = result);
     } catch (error) {
       if (!mounted) return;
-
-      AppToast.show(
-        context,
-        message: error.toString().replaceAll('Exception: ', ''),
-        type: ToastType.error,
-      );
+      AppToast.show(context, message: error.toString().replaceAll('Exception: ', ''), type: ToastType.error);
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -55,25 +42,19 @@ class _RelatedProductsSectionState extends State<RelatedProductsSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+    final theme = Theme.of(context);
 
-    if (products.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (isLoading) return const _RelatedSkeleton();
+    if (products.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Related Products',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+        Row(
+          children: [
+            Expanded(child: Text('Related Products', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900))),
+            Text('${products.length} items', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          ],
         ),
         const SizedBox(height: 14),
         GridView.builder(
@@ -88,19 +69,48 @@ class _RelatedProductsSectionState extends State<RelatedProductsSection> {
           ),
           itemBuilder: (context, index) {
             final product = products[index];
-
-            return ProductCard(
-              product: product,
-              onTap: () {
-                Navigator.push(
+            return TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: Duration(milliseconds: 260 + index * 60),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) => Opacity(
+                opacity: value,
+                child: Transform.translate(offset: Offset(0, 18 * (1 - value)), child: child),
+              ),
+              child: ProductCard(
+                product: product,
+                onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => ProductDetailsScreen(productId: product.id),
-                  ),
-                );
-              },
+                  MaterialPageRoute(builder: (_) => ProductDetailsScreen(productId: product.id)),
+                ),
+              ),
             );
           },
+        ),
+      ],
+    );
+  }
+}
+
+class _RelatedSkeleton extends StatelessWidget {
+  const _RelatedSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(width: 170, height: 22, decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(999))),
+        const SizedBox(height: 14),
+        Row(
+          children: List.generate(2, (index) => Expanded(
+            child: Container(
+              height: 220,
+              margin: EdgeInsets.only(right: index == 0 ? 14 : 0),
+              decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(24)),
+            ),
+          )),
         ),
       ],
     );

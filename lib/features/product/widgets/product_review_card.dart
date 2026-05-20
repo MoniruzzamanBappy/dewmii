@@ -10,88 +10,114 @@ class ProductReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.lightBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                backgroundImage: review.user.avatarUrl != null
-                    ? NetworkImage(review.user.avatarUrl!)
-                    : null,
-                child: review.user.avatarUrl == null
-                    ? const Icon(Icons.person_rounded)
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  review.user.displayName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final date = review.createdAt == null
+        ? 'Recent review'
+        : '${review.createdAt!.day}/${review.createdAt!.month}/${review.createdAt!.year}';
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: .96, end: 1),
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: scheme.outlineVariant.withOpacity(.55)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? .18 : .05),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 23,
+                  backgroundColor: AppColors.primary.withOpacity(.14),
+                  backgroundImage: review.user.avatarUrl != null && review.user.avatarUrl!.isNotEmpty
+                      ? NetworkImage(review.user.avatarUrl!)
+                      : null,
+                  child: review.user.avatarUrl == null || review.user.avatarUrl!.isEmpty
+                      ? Text(_initials(review.user.displayName), style: const TextStyle(fontWeight: FontWeight.w900, color: AppColors.primary))
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(review.user.displayName, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w900)),
+                      const SizedBox(height: 2),
+                      Text(date, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withOpacity(.12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.star_rounded, color: AppColors.warning, size: 18),
+                      const SizedBox(width: 3),
+                      Text('${review.rating}', style: const TextStyle(fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (review.comment.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(review.comment, style: theme.textTheme.bodyMedium?.copyWith(height: 1.45, color: scheme.onSurfaceVariant)),
+            ],
+            if (review.images.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 80,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: review.images.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) => ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.network(
+                      review.images[index],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        width: 80,
+                        height: 80,
+                        color: scheme.surfaceContainerHighest,
+                        child: Icon(Icons.image_not_supported_rounded, color: scheme.onSurfaceVariant),
+                      ),
+                    ),
                   ),
                 ),
               ),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.star_rounded,
-                    color: AppColors.warning,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 3),
-                  Text(
-                    '${review.rating}',
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ],
-              ),
             ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            review.comment,
-            style: const TextStyle(
-              height: 1.45,
-              color: AppColors.lightTextSecondary,
-            ),
-          ),
-          if (review.images.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 76,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: review.images.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 76,
-                    height: 76,
-                    margin: const EdgeInsets.only(right: 10),
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Image.network(
-                      review.images[index],
-                      fit: BoxFit.cover,
-                    ),
-                  );
-                },
-              ),
-            ),
           ],
-        ],
+        ),
       ),
     );
+  }
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    if (parts.isEmpty) return 'U';
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'.toUpperCase();
   }
 }

@@ -10,25 +10,30 @@ class AddressApiService {
 
   Future<List<AddressModel>> getAddresses() async {
     final response = await _apiClient.get(ApiConstants.addresses);
-    final data = response['data'];
+    final data = _extractData(response);
 
-    if (data is! List) return [];
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((item) => AddressModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
 
-    return data
-        .map((item) => AddressModel.fromJson(item as Map<String, dynamic>))
-        .toList();
+    if (data is Map && data['addresses'] is List) {
+      return (data['addresses'] as List)
+          .whereType<Map>()
+          .map((item) => AddressModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
+
+    return [];
   }
 
   Future<AddressModel?> getAddressDetails(int addressId) async {
     final response = await _apiClient.get(
       ApiConstants.addressDetails(addressId),
     );
-
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) return null;
-
-    return AddressModel.fromJson(data);
+    return parseAddress(response);
   }
 
   Future<Map<String, dynamic>> addAddressDemo({
@@ -56,26 +61,53 @@ class AddressApiService {
   }
 
   AddressModel? parseAddress(Map<String, dynamic> response) {
-    final data = response['data'];
+    final data = _extractData(response);
 
-    if (data is! Map<String, dynamic>) return null;
+    if (data is Map) {
+      final map = Map<String, dynamic>.from(data);
+      final nestedAddress = map['address'];
 
-    return AddressModel.fromJson(data);
+      if (nestedAddress is Map) {
+        return AddressModel.fromJson(Map<String, dynamic>.from(nestedAddress));
+      }
+
+      return AddressModel.fromJson(map);
+    }
+
+    return null;
   }
 
   int? parseDeletedAddressId(Map<String, dynamic> response) {
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) return null;
-
-    return data['deleted_address_id'];
+    final data = _extractData(response);
+    if (data is Map) {
+      return _asInt(
+        data['deleted_address_id'] ?? data['id'] ?? data['address_id'],
+      );
+    }
+    return _asInt(response['deleted_address_id'] ?? response['id']);
   }
 
   int? parseDefaultAddressId(Map<String, dynamic> response) {
-    final data = response['data'];
+    final data = _extractData(response);
+    if (data is Map) {
+      return _asInt(
+        data['default_address_id'] ?? data['id'] ?? data['address_id'],
+      );
+    }
+    return _asInt(response['default_address_id'] ?? response['id']);
+  }
 
-    if (data is! Map<String, dynamic>) return null;
+  dynamic _extractData(Map<String, dynamic> response) {
+    return response['data'] ??
+        response['result'] ??
+        response['address'] ??
+        response;
+  }
 
-    return data['default_address_id'];
+  int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }

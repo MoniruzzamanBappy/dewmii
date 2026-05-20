@@ -20,28 +20,33 @@ class OrderPreviewModel {
   });
 
   factory OrderPreviewModel.fromJson(Map<String, dynamic> json) {
-    final itemsJson = json['items'];
     final couponJson = json['coupon'];
 
     return OrderPreviewModel(
-      items: itemsJson is List
-          ? itemsJson
-                .map(
-                  (item) =>
-                      CartItemModel.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
-      address: AddressModel.fromJson(json['address'] ?? <String, dynamic>{}),
-      shippingMethod: ShippingMethodModel.fromJson(
-        json['shipping_method'] ?? <String, dynamic>{},
-      ),
+      items: _list(json['items'], CartItemModel.fromJson),
+      address: json['address'] is Map<String, dynamic>
+          ? AddressModel.fromJson(json['address'] as Map<String, dynamic>)
+          : AddressModel.fromJson(const <String, dynamic>{}),
+      shippingMethod: json['shipping_method'] is Map<String, dynamic>
+          ? ShippingMethodModel.fromJson(json['shipping_method'] as Map<String, dynamic>)
+          : ShippingMethodModel.fromJson(const <String, dynamic>{}),
       coupon: couponJson is Map<String, dynamic>
           ? CartCouponModel.fromJson(couponJson)
           : null,
-      summary: CartSummaryModel.fromJson(
-        json['summary'] ?? <String, dynamic>{},
-      ),
+      summary: json['summary'] is Map<String, dynamic>
+          ? CartSummaryModel.fromJson(json['summary'] as Map<String, dynamic>)
+          : CartSummaryModel.empty(),
     );
+  }
+
+  static List<T> _list<T>(
+    dynamic value,
+    T Function(Map<String, dynamic>) parser,
+  ) {
+    if (value is! List) return [];
+    return value
+        .whereType<Map>()
+        .map((item) => parser(Map<String, dynamic>.from(item)))
+        .toList();
   }
 }

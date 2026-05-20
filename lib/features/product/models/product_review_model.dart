@@ -3,17 +3,13 @@ class ProductReviewUserModel {
   final String displayName;
   final String? avatarUrl;
 
-  ProductReviewUserModel({
-    required this.id,
-    required this.displayName,
-    this.avatarUrl,
-  });
+  const ProductReviewUserModel({required this.id, required this.displayName, this.avatarUrl});
 
   factory ProductReviewUserModel.fromJson(Map<String, dynamic> json) {
     return ProductReviewUserModel(
-      id: json['id'] ?? 0,
-      displayName: json['display_name'] ?? '',
-      avatarUrl: json['avatar_url'],
+      id: _asInt(json['id']),
+      displayName: _asString(json['display_name'] ?? json['displayName'] ?? json['name'] ?? 'Customer'),
+      avatarUrl: _nullableString(json['avatar_url'] ?? json['avatarUrl'] ?? json['avatar']),
     );
   }
 }
@@ -26,7 +22,7 @@ class ProductReviewModel {
   final List<String> images;
   final DateTime? createdAt;
 
-  ProductReviewModel({
+  const ProductReviewModel({
     required this.id,
     required this.user,
     required this.rating,
@@ -36,21 +32,14 @@ class ProductReviewModel {
   });
 
   factory ProductReviewModel.fromJson(Map<String, dynamic> json) {
-    final imageList = json['images'];
-
+    final imageList = _asList(json['images']);
     return ProductReviewModel(
-      id: json['id'] ?? 0,
-      user: ProductReviewUserModel.fromJson(
-        json['user'] ?? <String, dynamic>{},
-      ),
-      rating: json['rating'] ?? 0,
-      comment: json['comment'] ?? '',
-      images: imageList is List
-          ? imageList.map((item) => item.toString()).toList()
-          : [],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
+      id: _asInt(json['id']),
+      user: ProductReviewUserModel.fromJson(_asMap(json['user'] ?? json['customer'])),
+      rating: _asNum(json['rating'] ?? json['stars']),
+      comment: _asString(json['comment'] ?? json['review'] ?? json['message']),
+      images: imageList.map((item) => item.toString()).where((url) => url.isNotEmpty).toList(),
+      createdAt: DateTime.tryParse(_asString(json['created_at'] ?? json['createdAt'])),
     );
   }
 }
@@ -60,7 +49,7 @@ class ProductReviewSummaryModel {
   final int totalReviews;
   final Map<String, dynamic> ratingCount;
 
-  ProductReviewSummaryModel({
+  const ProductReviewSummaryModel({
     required this.averageRating,
     required this.totalReviews,
     required this.ratingCount,
@@ -68,9 +57,9 @@ class ProductReviewSummaryModel {
 
   factory ProductReviewSummaryModel.fromJson(Map<String, dynamic> json) {
     return ProductReviewSummaryModel(
-      averageRating: json['average_rating'] ?? 0,
-      totalReviews: json['total_reviews'] ?? 0,
-      ratingCount: json['rating_count'] ?? <String, dynamic>{},
+      averageRating: _asNum(json['average_rating'] ?? json['averageRating'] ?? json['rating']),
+      totalReviews: _asInt(json['total_reviews'] ?? json['totalReviews'] ?? json['count']),
+      ratingCount: _asMap(json['rating_count'] ?? json['ratingCount'] ?? json['breakdown']),
     );
   }
 }
@@ -79,23 +68,29 @@ class ProductReviewsResponseModel {
   final ProductReviewSummaryModel summary;
   final List<ProductReviewModel> reviews;
 
-  ProductReviewsResponseModel({required this.summary, required this.reviews});
+  const ProductReviewsResponseModel({required this.summary, required this.reviews});
 
   factory ProductReviewsResponseModel.fromJson(Map<String, dynamic> json) {
-    final items = json['items'];
-
+    final rawReviews = _asList(json['items'] ?? json['reviews'] ?? json['data']);
     return ProductReviewsResponseModel(
-      summary: ProductReviewSummaryModel.fromJson(
-        json['summary'] ?? <String, dynamic>{},
-      ),
-      reviews: items is List
-          ? items
-                .map(
-                  (item) =>
-                      ProductReviewModel.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
+      summary: ProductReviewSummaryModel.fromJson(_asMap(json['summary'] ?? json['review_summary'])),
+      reviews: rawReviews.map((item) => ProductReviewModel.fromJson(_asMap(item))).toList(),
     );
   }
 }
+
+int _asInt(dynamic value, [int fallback = 0]) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? double.tryParse(value)?.toInt() ?? fallback;
+  return fallback;
+}
+num _asNum(dynamic value, [num fallback = 0]) {
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value) ?? fallback;
+  return fallback;
+}
+String _asString(dynamic value, [String fallback = '']) => value?.toString() ?? fallback;
+String? _nullableString(dynamic value) => value == null ? null : value.toString();
+Map<String, dynamic> _asMap(dynamic value) => value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
+List<dynamic> _asList(dynamic value) => value is List ? value : <dynamic>[];

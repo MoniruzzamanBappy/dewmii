@@ -12,13 +12,7 @@ class CartApiService {
 
   Future<CartModel> getCart() async {
     final response = await _apiClient.get(ApiConstants.cart);
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) {
-      return CartModel.empty();
-    }
-
-    return CartModel.fromJson(data);
+    return _parseCartResponse(response);
   }
 
   Future<Map<String, dynamic>> addItemDemo({
@@ -26,78 +20,74 @@ class CartApiService {
     int? variantId,
     int quantity = 1,
   }) async {
-    final response = await _apiClient.get(ApiConstants.cartAddItem);
-    return response;
+    return _apiClient.get(ApiConstants.cartAddItem);
   }
 
   Future<Map<String, dynamic>> updateItemQuantityDemo({
     required int cartItemId,
     required int quantity,
   }) async {
-    final response = await _apiClient.get(ApiConstants.cartUpdateItem);
-    return response;
+    return _apiClient.get(ApiConstants.cartUpdateItem);
   }
 
   Future<Map<String, dynamic>> removeItemDemo({required int cartItemId}) async {
-    final response = await _apiClient.get(ApiConstants.cartRemoveItem);
-    return response;
+    return _apiClient.get(ApiConstants.cartRemoveItem);
   }
 
   Future<CartModel> clearCartDemo() async {
     final response = await _apiClient.get(ApiConstants.cartClear);
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) {
-      return CartModel.empty();
-    }
-
-    return CartModel.fromJson(data);
+    return _parseCartResponse(response);
   }
 
   Future<Map<String, dynamic>> applyCouponDemo({
     required String couponCode,
   }) async {
-    final response = await _apiClient.get(ApiConstants.cartApplyCoupon);
-    return response;
+    return _apiClient.get(ApiConstants.cartApplyCoupon);
   }
 
   Future<Map<String, dynamic>> removeCouponDemo() async {
-    final response = await _apiClient.get(ApiConstants.cartRemoveCoupon);
-    return response;
+    return _apiClient.get(ApiConstants.cartRemoveCoupon);
   }
 
   Future<CartSummaryModel> getSummary() async {
     final response = await _apiClient.get(ApiConstants.cartSummary);
     final data = response['data'];
 
-    if (data is! Map<String, dynamic>) {
-      return CartSummaryModel.empty();
+    if (data is Map) {
+      return CartSummaryModel.fromJson(Map<String, dynamic>.from(data));
     }
 
-    return CartSummaryModel.fromJson(data);
+    return CartSummaryModel.empty();
   }
 
   CartItemModel? parseUpdatedCartItem(Map<String, dynamic> response) {
     final data = response['data'];
+    if (data is! Map) return null;
 
-    if (data is! Map<String, dynamic>) return null;
+    final item = data['cart_item'] ?? data['cartItem'] ?? data['item'];
+    if (item is! Map) return null;
 
-    final cartItem = data['cart_item'];
-
-    if (cartItem is! Map<String, dynamic>) return null;
-
-    return CartItemModel.fromJson(cartItem);
+    return CartItemModel.fromJson(Map<String, dynamic>.from(item));
   }
 
   CartSummaryModel? parseSummary(Map<String, dynamic> response) {
     final data = response['data'];
+    if (data is! Map) return null;
 
-    if (data is! Map<String, dynamic>) return null;
+    final summary =
+        data['summary'] ?? data['cart_summary'] ?? data['cartSummary'];
+    if (summary is! Map) return null;
 
-    final summary = data['summary'];
+    return CartSummaryModel.fromJson(Map<String, dynamic>.from(summary));
+  }
 
-    if (summary is! Map<String, dynamic>) return null;
+  CartModel _parseCartResponse(Map<String, dynamic> response) {
+    final data = response['data'];
 
-    return CartSummaryModel.fromJson(summary);
+    if (data is Map) {
+      return CartModel.fromJson(Map<String, dynamic>.from(data));
+    }
+
+    return CartModel.empty();
   }
 }

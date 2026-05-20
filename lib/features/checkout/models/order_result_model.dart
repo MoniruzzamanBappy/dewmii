@@ -37,22 +37,38 @@ class OrderResultModel {
         : json;
 
     return OrderResultModel(
-      id: order['id'] ?? 0,
-      orderNumber: order['order_number'] ?? '',
-      userId: order['user_id'] ?? 0,
-      status: order['status'] ?? '',
-      paymentStatus: order['payment_status'] ?? '',
-      paymentMethod: order['payment_method'] ?? '',
-      subtotal: order['subtotal'] ?? 0,
-      discount: order['discount'] ?? 0,
-      shippingCharge: order['shipping_charge'] ?? 0,
-      tax: order['tax'] ?? 0,
-      total: order['total'] ?? 0,
-      currency: order['currency'] ?? 'BDT',
-      createdAt: order['created_at'] != null
-          ? DateTime.tryParse(order['created_at'])
-          : null,
-      redirectUrl: json['redirect_url'],
+      id: _toInt(order['id']),
+      orderNumber: _toString(order['order_number'] ?? order['orderNumber']),
+      userId: _toInt(order['user_id']),
+      status: _toString(order['status']),
+      paymentStatus: _toString(order['payment_status']),
+      paymentMethod: _toString(order['payment_method']),
+      subtotal: _toNum(order['subtotal']),
+      discount: _toNum(order['discount']),
+      shippingCharge: _toNum(order['shipping_charge']),
+      tax: _toNum(order['tax']),
+      total: _toNum(order['total']),
+      currency: _toString(order['currency']).isEmpty ? 'BDT' : _toString(order['currency']),
+      createdAt: _toDate(order['created_at']),
+      redirectUrl: (json['redirect_url'] ?? order['redirect_url'])?.toString(),
     );
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static num _toNum(dynamic value) {
+    if (value is num) return value;
+    return num.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static String _toString(dynamic value) => value?.toString() ?? '';
+
+  static DateTime? _toDate(dynamic value) {
+    if (value == null) return null;
+    return DateTime.tryParse(value.toString());
   }
 }

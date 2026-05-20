@@ -9,7 +9,7 @@ class SupportTicketModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  SupportTicketModel({
+  const SupportTicketModel({
     required this.id,
     required this.ticketNumber,
     required this.subject,
@@ -23,19 +23,15 @@ class SupportTicketModel {
 
   factory SupportTicketModel.fromJson(Map<String, dynamic> json) {
     return SupportTicketModel(
-      id: json['id'] ?? 0,
-      ticketNumber: json['ticket_number'] ?? '',
-      subject: json['subject'] ?? '',
-      status: json['status'] ?? '',
-      priority: json['priority'] ?? '',
-      orderId: json['order_id'],
-      lastMessage: json['last_message'] ?? json['message'] ?? '',
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      id: _toInt(json['id']),
+      ticketNumber: _toStringValue(json['ticket_number'] ?? json['ticketNumber'] ?? json['number']),
+      subject: _toStringValue(json['subject'] ?? json['title']),
+      status: _toStringValue(json['status']).isEmpty ? 'open' : _toStringValue(json['status']),
+      priority: _toStringValue(json['priority']).isEmpty ? 'medium' : _toStringValue(json['priority']),
+      orderId: _toNullableInt(json['order_id'] ?? json['orderId']),
+      lastMessage: _toStringValue(json['last_message'] ?? json['lastMessage'] ?? json['message']),
+      createdAt: _toDate(json['created_at'] ?? json['createdAt']),
+      updatedAt: _toDate(json['updated_at'] ?? json['updatedAt']),
     );
   }
 }
@@ -45,13 +41,13 @@ class SupportSenderModel {
   final String name;
   final String? avatarUrl;
 
-  SupportSenderModel({required this.id, required this.name, this.avatarUrl});
+  const SupportSenderModel({required this.id, required this.name, this.avatarUrl});
 
   factory SupportSenderModel.fromJson(Map<String, dynamic> json) {
     return SupportSenderModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      avatarUrl: json['avatar_url'],
+      id: _toInt(json['id']),
+      name: _toStringValue(json['name']).isEmpty ? 'Support' : _toStringValue(json['name']),
+      avatarUrl: _toNullableString(json['avatar_url'] ?? json['avatarUrl']),
     );
   }
 }
@@ -64,7 +60,7 @@ class SupportMessageModel {
   final List<String> attachments;
   final DateTime? createdAt;
 
-  SupportMessageModel({
+  const SupportMessageModel({
     required this.id,
     required this.senderType,
     required this.sender,
@@ -74,21 +70,22 @@ class SupportMessageModel {
   });
 
   factory SupportMessageModel.fromJson(Map<String, dynamic> json) {
+    final senderJson = json['sender'];
     final attachmentsJson = json['attachments'];
 
     return SupportMessageModel(
-      id: json['id'] ?? 0,
-      senderType: json['sender_type'] ?? '',
+      id: _toInt(json['id']),
+      senderType: _toStringValue(json['sender_type'] ?? json['senderType']).isEmpty
+          ? 'agent'
+          : _toStringValue(json['sender_type'] ?? json['senderType']),
       sender: SupportSenderModel.fromJson(
-        json['sender'] ?? <String, dynamic>{},
+        senderJson is Map<String, dynamic> ? senderJson : <String, dynamic>{},
       ),
-      message: json['message'] ?? '',
+      message: _toStringValue(json['message'] ?? json['body']),
       attachments: attachmentsJson is List
-          ? attachmentsJson.map((item) => item.toString()).toList()
-          : [],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
+          ? attachmentsJson.map((item) => item.toString()).where((item) => item.isNotEmpty).toList()
+          : const [],
+      createdAt: _toDate(json['created_at'] ?? json['createdAt']),
     );
   }
 }
@@ -104,7 +101,7 @@ class SupportTicketDetailsModel {
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
-  SupportTicketDetailsModel({
+  const SupportTicketDetailsModel({
     required this.id,
     required this.ticketNumber,
     required this.subject,
@@ -117,30 +114,51 @@ class SupportTicketDetailsModel {
   });
 
   factory SupportTicketDetailsModel.fromJson(Map<String, dynamic> json) {
-    final messagesJson = json['messages'];
+    final messagesJson = json['messages'] ?? json['replies'];
 
     return SupportTicketDetailsModel(
-      id: json['id'] ?? 0,
-      ticketNumber: json['ticket_number'] ?? '',
-      subject: json['subject'] ?? '',
-      status: json['status'] ?? '',
-      priority: json['priority'] ?? '',
-      orderId: json['order_id'],
+      id: _toInt(json['id']),
+      ticketNumber: _toStringValue(json['ticket_number'] ?? json['ticketNumber'] ?? json['number']),
+      subject: _toStringValue(json['subject'] ?? json['title']),
+      status: _toStringValue(json['status']).isEmpty ? 'open' : _toStringValue(json['status']),
+      priority: _toStringValue(json['priority']).isEmpty ? 'medium' : _toStringValue(json['priority']),
+      orderId: _toNullableInt(json['order_id'] ?? json['orderId']),
       messages: messagesJson is List
           ? messagesJson
-                .map(
-                  (item) => SupportMessageModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
-          : [],
-      createdAt: json['created_at'] != null
-          ? DateTime.tryParse(json['created_at'])
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+              .whereType<Map>()
+              .map((item) => SupportMessageModel.fromJson(Map<String, dynamic>.from(item)))
+              .toList()
+          : const [],
+      createdAt: _toDate(json['created_at'] ?? json['createdAt']),
+      updatedAt: _toDate(json['updated_at'] ?? json['updatedAt']),
     );
   }
+}
+
+int _toInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? 0;
+  return 0;
+}
+
+int? _toNullableInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
+String _toStringValue(dynamic value) => value?.toString() ?? '';
+
+String? _toNullableString(dynamic value) {
+  final text = value?.toString();
+  return text == null || text.trim().isEmpty ? null : text;
+}
+
+DateTime? _toDate(dynamic value) {
+  if (value is DateTime) return value;
+  if (value is String && value.trim().isNotEmpty) return DateTime.tryParse(value);
+  return null;
 }

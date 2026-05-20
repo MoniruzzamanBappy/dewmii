@@ -3,17 +3,13 @@ class ProductCategoryInfo {
   final String name;
   final String slug;
 
-  ProductCategoryInfo({
-    required this.id,
-    required this.name,
-    required this.slug,
-  });
+  const ProductCategoryInfo({required this.id, required this.name, required this.slug});
 
   factory ProductCategoryInfo.fromJson(Map<String, dynamic> json) {
     return ProductCategoryInfo(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      slug: json['slug'] ?? '',
+      id: _asInt(json['id']),
+      name: _asString(json['name']),
+      slug: _asString(json['slug']),
     );
   }
 }
@@ -23,17 +19,13 @@ class ProductBrandInfo {
   final String name;
   final String logoUrl;
 
-  ProductBrandInfo({
-    required this.id,
-    required this.name,
-    required this.logoUrl,
-  });
+  const ProductBrandInfo({required this.id, required this.name, required this.logoUrl});
 
   factory ProductBrandInfo.fromJson(Map<String, dynamic> json) {
     return ProductBrandInfo(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      logoUrl: json['logo_url'] ?? '',
+      id: _asInt(json['id']),
+      name: _asString(json['name']),
+      logoUrl: _asString(json['logo_url'] ?? json['logoUrl'] ?? json['logo']),
     );
   }
 }
@@ -43,17 +35,13 @@ class ProductDetailImage {
   final String imageUrl;
   final bool isPrimary;
 
-  ProductDetailImage({
-    required this.id,
-    required this.imageUrl,
-    required this.isPrimary,
-  });
+  const ProductDetailImage({required this.id, required this.imageUrl, required this.isPrimary});
 
   factory ProductDetailImage.fromJson(Map<String, dynamic> json) {
     return ProductDetailImage(
-      id: json['id'] ?? 0,
-      imageUrl: json['image_url'] ?? '',
-      isPrimary: json['is_primary'] ?? false,
+      id: _asInt(json['id']),
+      imageUrl: _asString(json['image_url'] ?? json['imageUrl'] ?? json['url'] ?? json['src']),
+      isPrimary: _asBool(json['is_primary'] ?? json['isPrimary']),
     );
   }
 }
@@ -66,7 +54,7 @@ class ProductVariantModel {
   final num price;
   final int stock;
 
-  ProductVariantModel({
+  const ProductVariantModel({
     required this.id,
     required this.type,
     required this.name,
@@ -77,12 +65,12 @@ class ProductVariantModel {
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
     return ProductVariantModel(
-      id: json['id'] ?? 0,
-      type: json['type'] ?? '',
-      name: json['name'] ?? '',
-      colorCode: json['color_code'],
-      price: json['price'] ?? 0,
-      stock: json['stock'] ?? 0,
+      id: _asInt(json['id']),
+      type: _asString(json['type'] ?? json['variant_type']),
+      name: _asString(json['name'] ?? json['value']),
+      colorCode: _nullableString(json['color_code'] ?? json['colorCode']),
+      price: _asNum(json['price']),
+      stock: _asInt(json['stock']),
     );
   }
 }
@@ -91,12 +79,12 @@ class ProductSpecificationModel {
   final String name;
   final String value;
 
-  ProductSpecificationModel({required this.name, required this.value});
+  const ProductSpecificationModel({required this.name, required this.value});
 
   factory ProductSpecificationModel.fromJson(Map<String, dynamic> json) {
     return ProductSpecificationModel(
-      name: json['name'] ?? '',
-      value: json['value'] ?? '',
+      name: _asString(json['name'] ?? json['key'] ?? json['title']),
+      value: _asString(json['value'] ?? json['description']),
     );
   }
 }
@@ -106,7 +94,7 @@ class ProductReviewSummary {
   final int totalReviews;
   final Map<String, dynamic> ratingCount;
 
-  ProductReviewSummary({
+  const ProductReviewSummary({
     required this.averageRating,
     required this.totalReviews,
     required this.ratingCount,
@@ -114,9 +102,9 @@ class ProductReviewSummary {
 
   factory ProductReviewSummary.fromJson(Map<String, dynamic> json) {
     return ProductReviewSummary(
-      averageRating: json['average_rating'] ?? 0,
-      totalReviews: json['total_reviews'] ?? 0,
-      ratingCount: json['rating_count'] ?? <String, dynamic>{},
+      averageRating: _asNum(json['average_rating'] ?? json['averageRating'] ?? json['rating']),
+      totalReviews: _asInt(json['total_reviews'] ?? json['totalReviews'] ?? json['count']),
+      ratingCount: _asMap(json['rating_count'] ?? json['ratingCount'] ?? json['breakdown']),
     );
   }
 }
@@ -144,7 +132,7 @@ class ProductDetailModel {
   final List<ProductSpecificationModel> specifications;
   final ProductReviewSummary reviewSummary;
 
-  ProductDetailModel({
+  const ProductDetailModel({
     required this.id,
     required this.category,
     required this.brand,
@@ -169,71 +157,74 @@ class ProductDetailModel {
   });
 
   factory ProductDetailModel.fromJson(Map<String, dynamic> json) {
-    final imagesJson = json['images'];
-    final variantsJson = json['variants'];
-    final specificationsJson = json['specifications'];
+    final imageItems = _asList(json['images']);
+    final variantItems = _asList(json['variants']);
+    final specificationItems = _asList(json['specifications'] ?? json['specs']);
+    final rawPrice = _asNum(json['price']);
 
     return ProductDetailModel(
-      id: json['id'] ?? 0,
-      category: ProductCategoryInfo.fromJson(
-        json['category'] ?? <String, dynamic>{},
-      ),
-      brand: ProductBrandInfo.fromJson(json['brand'] ?? <String, dynamic>{}),
-      name: json['name'] ?? '',
-      slug: json['slug'] ?? '',
-      sku: json['sku'] ?? '',
-      shortDescription: json['short_description'] ?? '',
-      description: json['description'] ?? '',
-      price: json['price'] ?? 0,
-      discountPrice: json['discount_price'] ?? json['price'] ?? 0,
-      discountPercentage: json['discount_percentage'] ?? 0,
-      stock: json['stock'] ?? 0,
-      stockStatus: json['stock_status'] ?? '',
-      rating: json['rating'] ?? 0,
-      totalReviews: json['total_reviews'] ?? 0,
-      isFeatured: json['is_featured'] ?? false,
-      isWishlist: json['is_wishlist'] ?? false,
-      images: imagesJson is List
-          ? imagesJson
-                .map(
-                  (item) =>
-                      ProductDetailImage.fromJson(item as Map<String, dynamic>),
-                )
-                .toList()
-          : [],
-      variants: variantsJson is List
-          ? variantsJson
-                .map(
-                  (item) => ProductVariantModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
-          : [],
-      specifications: specificationsJson is List
-          ? specificationsJson
-                .map(
-                  (item) => ProductSpecificationModel.fromJson(
-                    item as Map<String, dynamic>,
-                  ),
-                )
-                .toList()
-          : [],
-      reviewSummary: ProductReviewSummary.fromJson(
-        json['review_summary'] ?? <String, dynamic>{},
-      ),
+      id: _asInt(json['id']),
+      category: ProductCategoryInfo.fromJson(_asMap(json['category'])),
+      brand: ProductBrandInfo.fromJson(_asMap(json['brand'])),
+      name: _asString(json['name'] ?? json['title']),
+      slug: _asString(json['slug']),
+      sku: _asString(json['sku']),
+      shortDescription: _asString(json['short_description'] ?? json['shortDescription'] ?? json['subtitle']),
+      description: _asString(json['description'] ?? json['details']),
+      price: rawPrice,
+      discountPrice: _asNum(json['discount_price'] ?? json['discountPrice'] ?? json['sale_price'] ?? rawPrice),
+      discountPercentage: _asNum(json['discount_percentage'] ?? json['discountPercentage']),
+      stock: _asInt(json['stock'] ?? json['available_stock']),
+      stockStatus: _asString(json['stock_status'] ?? json['stockStatus']),
+      rating: _asNum(json['rating'] ?? json['average_rating']),
+      totalReviews: _asInt(json['total_reviews'] ?? json['reviews_count']),
+      isFeatured: _asBool(json['is_featured'] ?? json['isFeatured']),
+      isWishlist: _asBool(json['is_wishlist'] ?? json['isWishlist']),
+      images: imageItems.map((item) => ProductDetailImage.fromJson(_asMap(item))).toList(),
+      variants: variantItems.map((item) => ProductVariantModel.fromJson(_asMap(item))).toList(),
+      specifications: specificationItems.map((item) => ProductSpecificationModel.fromJson(_asMap(item))).toList(),
+      reviewSummary: ProductReviewSummary.fromJson(_asMap(json['review_summary'] ?? json['reviewSummary'])),
     );
+  }
+
+  List<String> get imageUrls {
+    final urls = images.map((image) => image.imageUrl).where((url) => url.trim().isNotEmpty).toList();
+    return urls.isEmpty ? [primaryImage] : urls;
   }
 
   String get primaryImage {
     if (images.isEmpty) return '';
-
-    final primaryImages = images.where((image) => image.isPrimary).toList();
-
-    if (primaryImages.isNotEmpty) {
-      return primaryImages.first.imageUrl;
-    }
-
+    final primary = images.where((image) => image.isPrimary && image.imageUrl.isNotEmpty).toList();
+    if (primary.isNotEmpty) return primary.first.imageUrl;
     return images.first.imageUrl;
   }
+
+  bool get hasDiscount => discountPrice > 0 && discountPrice < price;
+  num get displayPrice => hasDiscount ? discountPrice : price;
+  bool get inStock => stock > 0 || stockStatus.toLowerCase().contains('stock');
 }
+
+int _asInt(dynamic value, [int fallback = 0]) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? double.tryParse(value)?.toInt() ?? fallback;
+  return fallback;
+}
+
+num _asNum(dynamic value, [num fallback = 0]) {
+  if (value is num) return value;
+  if (value is String) return num.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+bool _asBool(dynamic value, [bool fallback = false]) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) return ['true', '1', 'yes', 'y'].contains(value.toLowerCase());
+  return fallback;
+}
+
+String _asString(dynamic value, [String fallback = '']) => value?.toString() ?? fallback;
+String? _nullableString(dynamic value) => value == null ? null : value.toString();
+Map<String, dynamic> _asMap(dynamic value) => value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
+List<dynamic> _asList(dynamic value) => value is List ? value : <dynamic>[];

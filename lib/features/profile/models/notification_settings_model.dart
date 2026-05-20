@@ -8,7 +8,7 @@ class NotificationSettingsModel {
   final bool supportUpdates;
   final DateTime? updatedAt;
 
-  NotificationSettingsModel({
+  const NotificationSettingsModel({
     required this.pushNotification,
     required this.emailNotification,
     required this.smsNotification,
@@ -21,18 +21,26 @@ class NotificationSettingsModel {
 
   factory NotificationSettingsModel.fromJson(Map<String, dynamic> json) {
     return NotificationSettingsModel(
-      pushNotification: json['push_notification'] ?? false,
-      emailNotification: json['email_notification'] ?? false,
-      smsNotification: json['sms_notification'] ?? false,
-      orderUpdates: json['order_updates'] ?? false,
-      promotionalOffers: json['promotional_offers'] ?? false,
-      wishlistUpdates: json['wishlist_updates'] ?? false,
-      supportUpdates: json['support_updates'] ?? false,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.tryParse(json['updated_at'])
-          : null,
+      pushNotification: _toBool(json['push_notification'] ?? json['pushNotification']),
+      emailNotification: _toBool(json['email_notification'] ?? json['emailNotification']),
+      smsNotification: _toBool(json['sms_notification'] ?? json['smsNotification']),
+      orderUpdates: _toBool(json['order_updates'] ?? json['orderUpdates']),
+      promotionalOffers: _toBool(json['promotional_offers'] ?? json['promotionalOffers']),
+      wishlistUpdates: _toBool(json['wishlist_updates'] ?? json['wishlistUpdates']),
+      supportUpdates: _toBool(json['support_updates'] ?? json['supportUpdates']),
+      updatedAt: json['updated_at'] != null ? DateTime.tryParse(json['updated_at'].toString()) : null,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'push_notification': pushNotification,
+        'email_notification': emailNotification,
+        'sms_notification': smsNotification,
+        'order_updates': orderUpdates,
+        'promotional_offers': promotionalOffers,
+        'wishlist_updates': wishlistUpdates,
+        'support_updates': supportUpdates,
+      };
 
   NotificationSettingsModel copyWith({
     bool? pushNotification,
@@ -54,5 +62,11 @@ class NotificationSettingsModel {
       supportUpdates: supportUpdates ?? this.supportUpdates,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    final text = value?.toString().toLowerCase().trim();
+    return text == 'true' || text == '1' || text == 'yes';
   }
 }

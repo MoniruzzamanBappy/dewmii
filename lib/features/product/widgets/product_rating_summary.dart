@@ -10,76 +10,74 @@ class ProductRatingSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final average = summary.averageRating.toDouble();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.lightBorder),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.outlineVariant.withOpacity(.55)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? .22 : .06),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Column(
-            children: [
-              Text(
-                '${summary.averageRating}',
-                style: const TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.primary,
+          Container(
+            width: 104,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  average.toStringAsFixed(average.truncateToDouble() == average ? 0 : 1),
+                  style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white),
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Row(
-                children: [
-                  Icon(Icons.star_rounded, color: AppColors.warning, size: 18),
-                  Icon(Icons.star_rounded, color: AppColors.warning, size: 18),
-                  Icon(Icons.star_rounded, color: AppColors.warning, size: 18),
-                  Icon(Icons.star_rounded, color: AppColors.warning, size: 18),
-                  Icon(
-                    Icons.star_half_rounded,
-                    color: AppColors.warning,
-                    size: 18,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${summary.totalReviews} reviews',
-                style: const TextStyle(color: AppColors.lightTextSecondary),
-              ),
-            ],
+                const SizedBox(height: 6),
+                _Stars(value: average, color: Colors.white),
+                const SizedBox(height: 6),
+                Text('${summary.totalReviews} reviews', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+              ],
+            ),
           ),
-          const SizedBox(width: 22),
+          const SizedBox(width: 18),
           Expanded(
             child: Column(
               children: [5, 4, 3, 2, 1].map((star) {
-                final count = summary.ratingCount['$star'] ?? 0;
-                final progress = summary.totalReviews == 0
-                    ? 0.0
-                    : (count as num).toDouble() / summary.totalReviews;
-
+                final countValue = summary.ratingCount['$star'] ?? summary.ratingCount[star] ?? 0;
+                final count = countValue is num ? countValue.toInt() : int.tryParse(countValue.toString()) ?? 0;
+                final progress = summary.totalReviews == 0 ? 0.0 : count / summary.totalReviews;
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Row(
                     children: [
-                      Text('$star'),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 14,
-                        color: AppColors.warning,
-                      ),
+                      SizedBox(width: 18, child: Text('$star', style: theme.textTheme.labelMedium)),
+                      const Icon(Icons.star_rounded, size: 15, color: AppColors.warning),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 7,
+                        child: ClipRRect(
                           borderRadius: BorderRadius.circular(999),
+                          child: LinearProgressIndicator(
+                            value: progress.clamp(0, 1),
+                            minHeight: 8,
+                            backgroundColor: colorScheme.surfaceContainerHighest,
+                            color: AppColors.warning,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text('$count', style: const TextStyle(fontSize: 12)),
+                      SizedBox(width: 28, child: Text('$count', textAlign: TextAlign.end, style: theme.textTheme.labelSmall)),
                     ],
                   ),
                 );
@@ -88,6 +86,28 @@ class ProductRatingSummary extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _Stars extends StatelessWidget {
+  final double value;
+  final Color color;
+
+  const _Stars({required this.value, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        final icon = value >= index + 1
+            ? Icons.star_rounded
+            : value > index
+                ? Icons.star_half_rounded
+                : Icons.star_border_rounded;
+        return Icon(icon, size: 16, color: color);
+      }),
     );
   }
 }

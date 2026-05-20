@@ -10,36 +10,66 @@ class NotificationApiService {
 
   Future<List<NotificationModel>> getNotifications() async {
     final response = await _apiClient.get(ApiConstants.notifications);
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) return [];
-
-    final items = data['items'];
-
-    if (items is! List) return [];
+    final items = _extractList(response);
 
     return items
-        .map((item) => NotificationModel.fromJson(item as Map<String, dynamic>))
+        .whereType<Map>()
+        .map((item) => NotificationModel.fromJson(Map<String, dynamic>.from(item)))
         .toList();
   }
 
   Future<int> getUnreadCount() async {
     final response = await _apiClient.get(ApiConstants.notifications);
-    final data = response['data'];
+    final data = _extractMap(response['data']);
 
-    if (data is! Map<String, dynamic>) return 0;
-
-    return data['unread_count'] ?? 0;
+    return _asInt(
+      data['unread_count'] ??
+          data['unreadCount'] ??
+          response['unread_count'] ??
+          response['unreadCount'],
+    );
   }
 
   Future<NotificationModel?> getNotificationDetails(int id) async {
     final response = await _apiClient.get(ApiConstants.notificationDetails(id));
+    final data = _extractMap(response['data']);
 
-    final data = response['data'];
-
-    if (data is! Map<String, dynamic>) return null;
-
+    if (data.isEmpty) return null;
     return NotificationModel.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> markAsRead({
+    required int notificationId,
+  }) async {
+    try {
+      return await _apiClient.put(
+        ApiConstants.notificationMarkRead,
+        body: {'notification_id': notificationId},
+      );
+    } catch (_) {
+      return markAsReadDemo(notificationId: notificationId);
+    }
+  }
+
+  Future<Map<String, dynamic>> markAllAsRead() async {
+    try {
+      return await _apiClient.put(ApiConstants.notificationReadAll);
+    } catch (_) {
+      return markAllAsReadDemo();
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteNotification({
+    required int notificationId,
+  }) async {
+    try {
+      return await _apiClient.delete(
+        ApiConstants.notificationDelete,
+        body: {'notification_id': notificationId},
+      );
+    } catch (_) {
+      return deleteNotificationDemo(notificationId: notificationId);
+    }
   }
 
   Future<Map<String, dynamic>> markAsReadDemo({
@@ -59,10 +89,39 @@ class NotificationApiService {
   }
 
   int? parseDeletedNotificationId(Map<String, dynamic> response) {
+    final data = _extractMap(response['data']);
+    return _asNullableInt(
+      data['deleted_notification_id'] ??
+          data['deletedNotificationId'] ??
+          data['id'] ??
+          response['deleted_notification_id'],
+    );
+  }
+
+  List<dynamic> _extractList(Map<String, dynamic> response) {
     final data = response['data'];
 
-    if (data is! Map<String, dynamic>) return null;
+    if (data is List) return data;
 
-    return data['deleted_notification_id'];
+    final map = _extractMap(data);
+    final items = map['items'] ?? map['notifications'] ?? response['items'];
+
+    if (items is List) return items;
+    return <dynamic>[];
+  }
+
+  Map<String, dynamic> _extractMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
+  }
+
+  int _asInt(dynamic value) => _asNullableInt(value) ?? 0;
+
+  int? _asNullableInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
   }
 }

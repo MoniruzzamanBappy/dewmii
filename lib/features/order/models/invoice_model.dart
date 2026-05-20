@@ -5,7 +5,7 @@ class InvoiceModel {
   final String invoiceUrl;
   final DateTime? generatedAt;
 
-  InvoiceModel({
+  const InvoiceModel({
     required this.orderId,
     required this.orderNumber,
     required this.invoiceNumber,
@@ -15,13 +15,28 @@ class InvoiceModel {
 
   factory InvoiceModel.fromJson(Map<String, dynamic> json) {
     return InvoiceModel(
-      orderId: json['order_id'] ?? 0,
-      orderNumber: json['order_number'] ?? '',
-      invoiceNumber: json['invoice_number'] ?? '',
-      invoiceUrl: json['invoice_url'] ?? '',
-      generatedAt: json['generated_at'] != null
-          ? DateTime.tryParse(json['generated_at'])
-          : null,
+      orderId: _Json.intValue(json['order_id'] ?? json['orderId']),
+      orderNumber: _Json.stringValue(json['order_number'] ?? json['orderNumber']),
+      invoiceNumber: _Json.stringValue(json['invoice_number'] ?? json['invoiceNumber']),
+      invoiceUrl: _Json.stringValue(json['invoice_url'] ?? json['invoiceUrl']),
+      generatedAt: _Json.dateValue(json['generated_at'] ?? json['generatedAt']),
     );
+  }
+}
+
+class _Json {
+  static int intValue(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static String stringValue(dynamic value) => value?.toString() ?? '';
+
+  static DateTime? dateValue(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 }

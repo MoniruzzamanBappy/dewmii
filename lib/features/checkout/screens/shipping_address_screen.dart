@@ -38,13 +38,11 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
     if (result != null) {
       setState(() {
         final index = addresses.indexWhere((item) => item.id == result.id);
-
         if (index >= 0) {
           addresses[index] = result;
         } else {
           addresses.add(result);
         }
-
         selectedAddress = result;
       });
     }
@@ -61,64 +59,147 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
         title: const Text('Shipping Address'),
         actions: [
           IconButton(
-            onPressed: () {
-              openAddEditAddress();
-            },
+            onPressed: () => openAddEditAddress(),
             icon: const Icon(Icons.add_rounded),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          ...addresses.map((address) {
-            final isSelected = selectedAddress?.id == address.id;
+      body: addresses.isEmpty
+          ? _AddressEmptyState(onAdd: () => openAddEditAddress())
+          : ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
+              children: [
+                ...addresses.map((address) {
+                  final isSelected = selectedAddress?.id == address.id;
+                  return _AddressTile(
+                    address: address,
+                    selected: isSelected,
+                    onTap: () {
+                      setState(() => selectedAddress = address);
+                      selectAndReturn(address);
+                    },
+                    onEdit: () => openAddEditAddress(address: address),
+                  );
+                }),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => openAddEditAddress(),
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Add New Address'),
+                ),
+              ],
+            ),
+    );
+  }
+}
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              decoration: BoxDecoration(
-                color: AppColors.lightSurface,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.lightBorder,
-                  width: isSelected ? 1.6 : 1,
+class _AddressTile extends StatelessWidget {
+  final AddressModel address;
+  final bool selected;
+  final VoidCallback onTap;
+  final VoidCallback onEdit;
+
+  const _AddressTile({
+    required this.address,
+    required this.selected,
+    required this.onTap,
+    required this.onEdit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final surface = dark ? AppColors.darkSurface : AppColors.lightSurface;
+    final border = selected ? AppColors.primary : (dark ? AppColors.darkBorder : AppColors.lightBorder);
+    final secondary = dark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: border, width: selected ? 1.6 : 1),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(address.type == 'office' ? Icons.business_rounded : Icons.home_rounded, color: AppColors.primary),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(address.name, style: const TextStyle(fontWeight: FontWeight.w900)),
+                        if (address.isDefault)
+                          const Chip(
+                            label: Text('Default'),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Text(address.phone, style: TextStyle(color: secondary, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(address.fullAddress, style: TextStyle(color: secondary, height: 1.35)),
+                  ],
                 ),
               ),
-              child: ListTile(
-                onTap: () => selectAndReturn(address),
-                contentPadding: const EdgeInsets.all(16),
-                leading: Icon(
-                  isSelected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_off_rounded,
-                  color: isSelected ? AppColors.primary : AppColors.muted,
-                ),
-                title: Text(
-                  address.name,
-                  style: const TextStyle(fontWeight: FontWeight.w900),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text('${address.phone}\n${address.fullAddress}'),
-                ),
-                trailing: IconButton(
-                  onPressed: () {
-                    openAddEditAddress(address: address);
-                  },
-                  icon: const Icon(Icons.edit_rounded),
-                ),
+              IconButton(
+                onPressed: onEdit,
+                icon: const Icon(Icons.edit_rounded),
               ),
-            );
-          }),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () {
-              openAddEditAddress();
-            },
-            icon: const Icon(Icons.add_location_alt_rounded),
-            label: const Text('Add New Address'),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AddressEmptyState extends StatelessWidget {
+  final VoidCallback onAdd;
+
+  const _AddressEmptyState({required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.location_off_rounded, size: 72, color: AppColors.primary),
+            const SizedBox(height: 18),
+            const Text('No address added yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            const Text('Add your delivery address to continue checkout.', textAlign: TextAlign.center),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Add Address'),
+            ),
+          ],
+        ),
       ),
     );
   }
