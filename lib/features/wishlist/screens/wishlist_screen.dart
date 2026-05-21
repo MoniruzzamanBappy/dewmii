@@ -205,7 +205,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, animation, __) {
+        pageBuilder: (_, animation, _) {
           return FadeTransition(
             opacity: animation,
             child: ProductDetailsScreen(productId: item.productId),
@@ -291,7 +291,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                     sliver: SliverList.separated(
                       itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      separatorBuilder: (_, _) => const SizedBox(height: 14),
                       itemBuilder: (context, index) {
                         final item = items[index];
 

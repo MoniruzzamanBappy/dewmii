@@ -199,7 +199,7 @@ class _ProductContent extends StatelessWidget {
                         child: Image.network(
                           images[safeImageIndex],
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             decoration: const BoxDecoration(gradient: AppColors.heroGradient),
                             child: const Icon(Icons.broken_image_rounded, size: 82, color: Colors.white70),
                           ),
@@ -235,7 +235,7 @@ class _ProductContent extends StatelessWidget {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: images.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 10),
+                          separatorBuilder: (_, _) => const SizedBox(width: 10),
                           itemBuilder: (context, index) {
                             final selected = index == safeImageIndex;
                             return GestureDetector(
@@ -396,7 +396,7 @@ class _Pill extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-      decoration: BoxDecoration(color: color ?? AppColors.primary.withOpacity(.12), borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(color: color ?? AppColors.primary.withValues(alpha: .12), borderRadius: BorderRadius.circular(999)),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 15, color: color == null ? AppColors.primary : scheme.onSecondaryContainer),
         const SizedBox(width: 5),
@@ -439,7 +439,7 @@ class _PriceRatingRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isAvailable ? AppColors.success.withOpacity(.12) : AppColors.error.withOpacity(.12),
+            color: isAvailable ? AppColors.success.withValues(alpha: .12) : AppColors.error.withValues(alpha: .12),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(isAvailable ? 'In stock' : 'Out of stock', style: TextStyle(color: isAvailable ? AppColors.success : AppColors.error, fontWeight: FontWeight.w900)),
@@ -477,7 +477,7 @@ class _InfoTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: scheme.outlineVariant.withOpacity(.55))),
+      decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: scheme.outlineVariant.withValues(alpha: .55))),
       child: Column(children: [
         Icon(icon, color: AppColors.primary),
         const SizedBox(height: 8),
@@ -497,13 +497,13 @@ class _SpecificationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: scheme.outlineVariant.withOpacity(.55))),
+      decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: scheme.outlineVariant.withValues(alpha: .55))),
       child: Column(
         children: List.generate(specifications.length, (index) {
           final spec = specifications[index];
           return Container(
             padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(border: Border(top: index == 0 ? BorderSide.none : BorderSide(color: scheme.outlineVariant.withOpacity(.35)))),
+            decoration: BoxDecoration(border: Border(top: index == 0 ? BorderSide.none : BorderSide(color: scheme.outlineVariant.withValues(alpha: .35)))),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(child: Text(spec.name, style: TextStyle(color: scheme.onSurfaceVariant, fontWeight: FontWeight.w700))),
               const SizedBox(width: 12),
@@ -537,7 +537,7 @@ class _RoundIconButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Material(
-        color: Colors.black.withOpacity(.28),
+        color: Colors.black.withValues(alpha: .28),
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
@@ -579,7 +579,7 @@ class _BottomCartBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
       decoration: BoxDecoration(
         color: scheme.surface,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(.08), blurRadius: 24, offset: const Offset(0, -10))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .08), blurRadius: 24, offset: const Offset(0, -10))],
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       ),
       child: SafeArea(
@@ -647,7 +647,7 @@ class _ProductNotFound extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(Icons.search_off_rounded, size: 84, color: theme.colorScheme.primary.withOpacity(.35)),
+          Icon(Icons.search_off_rounded, size: 84, color: theme.colorScheme.primary.withValues(alpha: .35)),
           const SizedBox(height: 18),
           Text('Product not found', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
           const SizedBox(height: 8),

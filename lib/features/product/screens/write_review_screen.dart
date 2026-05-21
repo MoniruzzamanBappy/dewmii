@@ -89,7 +89,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: scheme.outlineVariant.withOpacity(.55))),
+                decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(22), border: Border.all(color: scheme.outlineVariant.withValues(alpha: .55))),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(5, (index) {

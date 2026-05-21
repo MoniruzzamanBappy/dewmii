@@ -97,7 +97,7 @@ class SupportApiService {
       'subject': subject,
       'message': message,
       'priority': priority,
-      if (orderId != null) 'order_id': orderId,
+      'order_id': ?orderId,
     };
 
     try {

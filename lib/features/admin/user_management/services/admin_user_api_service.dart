@@ -36,7 +36,7 @@ class AdminUserApiService {
         body: {
           'user_id': userId,
           'status': status,
-          if (reason != null) 'reason': reason,
+          'reason': ?reason,
         },
       );
     } catch (_) {

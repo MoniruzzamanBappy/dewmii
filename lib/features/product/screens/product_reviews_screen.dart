@@ -151,7 +151,7 @@ class _EmptyReviews extends StatelessWidget {
       padding: const EdgeInsets.all(28),
       children: [
         const SizedBox(height: 80),
-        Icon(Icons.rate_review_outlined, size: 82, color: theme.colorScheme.primary.withOpacity(.35)),
+        Icon(Icons.rate_review_outlined, size: 82, color: theme.colorScheme.primary.withValues(alpha: .35)),
         const SizedBox(height: 18),
         Text('No reviews yet', textAlign: TextAlign.center, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900)),
         const SizedBox(height: 8),

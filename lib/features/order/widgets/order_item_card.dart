@@ -42,7 +42,7 @@ class OrderItemCard extends StatelessWidget {
                   : Image.network(
                       item.thumbnail,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Icon(Icons.shopping_bag_rounded, color: theme.colorScheme.primary),
+                      errorBuilder: (_, _, _) => Icon(Icons.shopping_bag_rounded, color: theme.colorScheme.primary),
                     ),
             ),
           ),

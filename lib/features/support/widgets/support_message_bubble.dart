@@ -90,7 +90,7 @@ class SupportMessageBubble extends StatelessWidget {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: message.attachments.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       return ClipRRect(
                         borderRadius: BorderRadius.circular(14),
@@ -99,7 +99,7 @@ class SupportMessageBubble extends StatelessWidget {
                           width: 74,
                           height: 74,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             width: 74,
                             height: 74,
                             color: colors.surfaceContainerHighest,

@@ -20,10 +20,10 @@ class ProductRatingSummary extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outlineVariant.withOpacity(.55)),
+        border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: .55)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? .22 : .06),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? .22 : .06),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),

@@ -52,4 +52,4 @@ bool _asBool(dynamic value, [bool fallback = false]) {
   return fallback;
 }
 String _asString(dynamic value, [String fallback = '']) => value?.toString() ?? fallback;
-String? _nullableString(dynamic value) => value == null ? null : value.toString();
+String? _nullableString(dynamic value) => value?.toString();

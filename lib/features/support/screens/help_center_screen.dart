@@ -66,8 +66,8 @@ class HelpCenterScreen extends StatelessWidget {
     Navigator.push(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, animation, __) => page,
-        transitionsBuilder: (_, animation, __, child) {
+        pageBuilder: (_, animation, _) => page,
+        transitionsBuilder: (_, animation, _, child) {
           final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
           return FadeTransition(
             opacity: curved,

@@ -27,9 +27,9 @@ class CheckoutApiService {
     int? paymentMethodId,
   }) async {
     final body = {
-      if (addressId != null) 'address_id': addressId,
-      if (shippingMethodId != null) 'shipping_method_id': shippingMethodId,
-      if (paymentMethodId != null) 'payment_method_id': paymentMethodId,
+      'address_id': ?addressId,
+      'shipping_method_id': ?shippingMethodId,
+      'payment_method_id': ?paymentMethodId,
     };
 
     try {
@@ -75,9 +75,9 @@ class CheckoutApiService {
     int? paymentMethodId,
   }) async {
     final body = {
-      if (addressId != null) 'address_id': addressId,
-      if (shippingMethodId != null) 'shipping_method_id': shippingMethodId,
-      if (paymentMethodId != null) 'payment_method_id': paymentMethodId,
+      'address_id': ?addressId,
+      'shipping_method_id': ?shippingMethodId,
+      'payment_method_id': ?paymentMethodId,
     };
 
     try {
@@ -94,7 +94,7 @@ class CheckoutApiService {
   }
 
   Future<PaymentResultModel?> initiatePaymentDemo({int? orderId}) async {
-    final body = {if (orderId != null) 'order_id': orderId};
+    final body = {'order_id': ?orderId};
 
     try {
       final response = await _apiClient.post(ApiConstants.paymentInitiate, body: body);

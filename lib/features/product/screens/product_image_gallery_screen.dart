@@ -58,7 +58,7 @@ class _ProductImageGalleryScreenState extends State<ProductImageGalleryScreen> {
                           child: Image.network(
                             images[index],
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(Icons.broken_image_rounded, size: 72, color: Colors.white54),
+                            errorBuilder: (_, _, _) => const Icon(Icons.broken_image_rounded, size: 72, color: Colors.white54),
                           ),
                         ),
                       ),
@@ -74,7 +74,7 @@ class _ProductImageGalleryScreenState extends State<ProductImageGalleryScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(.12),
+                          color: Colors.white.withValues(alpha: .12),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(color: Colors.white24),
                         ),

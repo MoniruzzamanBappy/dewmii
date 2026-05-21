@@ -88,12 +88,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Navigator.push(
         context,
         PageRouteBuilder(
-          pageBuilder: (_, animation, __) => OrderReviewScreen(
+          pageBuilder: (_, animation, _) => OrderReviewScreen(
             address: selectedAddress!,
             shippingMethod: selectedShippingMethod!,
             paymentMethod: selectedPaymentMethod!,
           ),
-          transitionsBuilder: (_, animation, __, child) {
+          transitionsBuilder: (_, animation, _, child) {
             return FadeTransition(
               opacity: animation,
               child: SlideTransition(
@@ -330,7 +330,7 @@ class _CheckoutItemTile extends StatelessWidget {
               width: 58,
               height: 58,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 width: 58,
                 height: 58,
                 color: AppColors.primary.withValues(alpha: 0.10),

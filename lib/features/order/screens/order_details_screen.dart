@@ -127,9 +127,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Route<T> _route<T>(Widget page) => PageRouteBuilder<T>(
-        pageBuilder: (_, __, ___) => page,
+        pageBuilder: (_, _, _) => page,
         transitionDuration: const Duration(milliseconds: 250),
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.06, 0.02), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)), child: child)),
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(opacity: animation, child: SlideTransition(position: Tween<Offset>(begin: const Offset(0.06, 0.02), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)), child: child)),
       );
 }
 

@@ -110,9 +110,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
   }
 
   Route<T> _slideRoute<T>(Widget page) => PageRouteBuilder<T>(
-        pageBuilder: (_, __, ___) => page,
+        pageBuilder: (_, _, _) => page,
         transitionDuration: const Duration(milliseconds: 260),
-        transitionsBuilder: (_, animation, __, child) {
+        transitionsBuilder: (_, animation, _, child) {
           return FadeTransition(
             opacity: animation,
             child: SlideTransition(

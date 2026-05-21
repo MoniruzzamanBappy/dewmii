@@ -187,7 +187,7 @@ class _AdminUpdateOrderStatusScreenState
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: statuses.contains(orderStatus) ? orderStatus : statuses.first,
+                      initialValue: statuses.contains(orderStatus) ? orderStatus : statuses.first,
                       decoration: _decoration('Status', Icons.flag_outlined),
                       items: statuses
                           .map(
@@ -228,7 +228,7 @@ class _AdminUpdateOrderStatusScreenState
                 child: Column(
                   children: [
                     DropdownButtonFormField<String>(
-                      value: paymentStatuses.contains(paymentStatus)
+                      initialValue: paymentStatuses.contains(paymentStatus)
                           ? paymentStatus
                           : paymentStatuses.first,
                       decoration: _decoration('Payment Status', Icons.credit_card_outlined),

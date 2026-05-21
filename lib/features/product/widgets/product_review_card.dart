@@ -27,10 +27,10 @@ class ProductReviewCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: scheme.surface,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: scheme.outlineVariant.withOpacity(.55)),
+          border: Border.all(color: scheme.outlineVariant.withValues(alpha: .55)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(theme.brightness == Brightness.dark ? .18 : .05),
+              color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? .18 : .05),
               blurRadius: 18,
               offset: const Offset(0, 10),
             ),
@@ -43,7 +43,7 @@ class ProductReviewCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 23,
-                  backgroundColor: AppColors.primary.withOpacity(.14),
+                  backgroundColor: AppColors.primary.withValues(alpha: .14),
                   backgroundImage: review.user.avatarUrl != null && review.user.avatarUrl!.isNotEmpty
                       ? NetworkImage(review.user.avatarUrl!)
                       : null,
@@ -65,7 +65,7 @@ class ProductReviewCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(.12),
+                    color: AppColors.warning.withValues(alpha: .12),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Row(
@@ -89,7 +89,7 @@ class ProductReviewCard extends StatelessWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: review.images.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  separatorBuilder: (_, _) => const SizedBox(width: 10),
                   itemBuilder: (context, index) => ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.network(
@@ -97,7 +97,7 @@ class ProductReviewCard extends StatelessWidget {
                       width: 80,
                       height: 80,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         width: 80,
                         height: 80,
                         color: scheme.surfaceContainerHighest,

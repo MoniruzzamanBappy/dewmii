@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
               right: -size.width * .2,
               child: _GlowOrb(
                 size: size.width * .68,
-                color: colorScheme.primary.withOpacity(isDark ? .2 : .16),
+                color: colorScheme.primary.withValues(alpha: isDark ? .2 : .16),
               ),
             ),
             Positioned(
@@ -113,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
               bottom: size.height * .04,
               child: _GlowOrb(
                 size: size.width * .82,
-                color: const Color(0xFFFF7A59).withOpacity(isDark ? .16 : .13),
+                color: const Color(0xFFFF7A59).withValues(alpha: isDark ? .16 : .13),
               ),
             ),
             SafeArea(
@@ -177,7 +177,7 @@ class _SplashScreenState extends State<SplashScreen>
                                 color: (isDark
                                         ? Colors.white
                                         : const Color(0xFF1E0D16))
-                                    .withOpacity(.66),
+                                    .withValues(alpha: .66),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -198,14 +198,14 @@ class _SplashScreenState extends State<SplashScreen>
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 colorScheme.primary,
                               ),
-                              backgroundColor: colorScheme.primary.withOpacity(.12),
+                              backgroundColor: colorScheme.primary.withValues(alpha: .12),
                             ),
                           ),
                           const SizedBox(height: 14),
                           Text(
                             'Preparing your store...',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withOpacity(.6),
+                              color: theme.colorScheme.onSurface.withValues(alpha: .6),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -240,11 +240,11 @@ class _BrandMark extends StatelessWidget {
       height: 116,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(34),
-        color: Colors.white.withOpacity(.18),
-        border: Border.all(color: Colors.white.withOpacity(.22)),
+        color: Colors.white.withValues(alpha: .18),
+        border: Border.all(color: Colors.white.withValues(alpha: .22)),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(.24),
+            color: accentColor.withValues(alpha: .24),
             blurRadius: 34,
             offset: const Offset(0, 18),
           ),
@@ -264,7 +264,7 @@ class _BrandMark extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    accentColor.withOpacity(.95),
+                    accentColor.withValues(alpha: .95),
                     const Color(0xFFFF7A59),
                   ],
                 ),

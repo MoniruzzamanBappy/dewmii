@@ -42,7 +42,7 @@ class AdminOrderItemCard extends StatelessWidget {
                     width: 70,
                     height: 78,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
+                    errorBuilder: (_, _, _) => Container(
                       width: 70,
                       height: 78,
                       color: AppColors.primary.withValues(alpha: 0.08),

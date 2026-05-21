@@ -157,7 +157,7 @@ class _ProductShell extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           child: thumbnail.isEmpty
               ? Container(width: 48, height: 48, color: color.withValues(alpha: 0.14), child: Icon(Icons.image_rounded, color: color))
-              : Image.network(thumbnail, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(width: 48, height: 48, color: color.withValues(alpha: 0.14), child: Icon(Icons.image_rounded, color: color))),
+              : Image.network(thumbnail, width: 48, height: 48, fit: BoxFit.cover, errorBuilder: (_, _, _) => Container(width: 48, height: 48, color: color.withValues(alpha: 0.14), child: Icon(Icons.image_rounded, color: color))),
         ),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w900)), const SizedBox(height: 3), Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis)])),

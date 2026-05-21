@@ -125,8 +125,9 @@ class CartItemModel {
 
   static num _asNum(dynamic value, {num fallback = 0}) {
     if (value is num) return value;
-    if (value is String)
+    if (value is String) {
       return num.tryParse(value.replaceAll(',', '')) ?? fallback;
+    }
     return fallback;
   }
 

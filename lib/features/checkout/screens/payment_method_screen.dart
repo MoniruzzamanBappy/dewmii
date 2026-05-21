@@ -116,7 +116,7 @@ class _PaymentTile extends StatelessWidget {
                 child: method.logoUrl.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(18),
-                        child: Image.network(method.logoUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.payment_rounded, color: AppColors.primary)),
+                        child: Image.network(method.logoUrl, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.payment_rounded, color: AppColors.primary)),
                       )
                     : const Icon(Icons.payment_rounded, color: AppColors.primary),
               ),

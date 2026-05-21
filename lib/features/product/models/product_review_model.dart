@@ -91,6 +91,6 @@ num _asNum(dynamic value, [num fallback = 0]) {
   return fallback;
 }
 String _asString(dynamic value, [String fallback = '']) => value?.toString() ?? fallback;
-String? _nullableString(dynamic value) => value == null ? null : value.toString();
+String? _nullableString(dynamic value) => value?.toString();
 Map<String, dynamic> _asMap(dynamic value) => value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
 List<dynamic> _asList(dynamic value) => value is List ? value : <dynamic>[];
