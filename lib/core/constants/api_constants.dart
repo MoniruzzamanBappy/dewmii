@@ -146,4 +146,66 @@ class ApiConstants {
   static String supportTicketDetails(int id) {
     return '$baseUrl/support/tickets/ticket-$id.json';
   }
+
+  // Admin Demo APIs
+  static const String adminLogin = '$baseUrl/admin/auth/login.json';
+  static const String adminDashboard = '$baseUrl/admin/dashboard.json';
+  static const String adminSalesAnalytics =
+      '$baseUrl/admin/analytics/sales.json';
+  static const String adminProductAnalytics =
+      '$baseUrl/admin/analytics/products.json';
+  static const String adminCustomerAnalytics =
+      '$baseUrl/admin/analytics/customers.json';
+
+  // Admin Product Management Demo APIs
+  static const String adminProducts = '$baseUrl/admin/products/index.json';
+  static const String adminProductCreate =
+      '$baseUrl/admin/products/create.json';
+  static const String adminProductUpdate =
+      '$baseUrl/admin/products/update.json';
+  static const String adminProductDelete =
+      '$baseUrl/admin/products/delete.json';
+  static const String adminProductUploadImages =
+      '$baseUrl/admin/products/upload-images.json';
+  static const String adminProductDeleteImage =
+      '$baseUrl/admin/products/delete-image.json';
+  static const String adminProductUpdateStock =
+      '$baseUrl/admin/products/update-stock.json';
+
+  static String adminProductDetails(int id) {
+    return '$baseUrl/admin/products/product-$id.json';
+  }
+
+  // Admin Category Management Demo APIs
+  static const String adminCategories = '$baseUrl/admin/categories/index.json';
+  static const String adminCategoryCreate =
+      '$baseUrl/admin/categories/create.json';
+  static const String adminCategoryUpdate =
+      '$baseUrl/admin/categories/update.json';
+  static const String adminCategoryDelete =
+      '$baseUrl/admin/categories/delete.json';
+
+  // Admin Order Management Demo APIs
+  static const String adminOrders = '$baseUrl/admin/orders/index.json';
+  static const String adminOrderUpdateStatus =
+      '$baseUrl/admin/orders/update-status.json';
+  static const String adminOrderUpdatePaymentStatus =
+      '$baseUrl/admin/orders/update-payment-status.json';
+  static const String adminOrderUpdateTracking =
+      '$baseUrl/admin/orders/update-tracking.json';
+
+  static String adminOrderDetails(int id) {
+    return '$baseUrl/admin/orders/order-$id.json';
+  }
+
+  // Admin User Management Demo APIs
+  static const String adminUsers = '$baseUrl/admin/users/index.json';
+  static const String adminUserUpdateStatus =
+      '$baseUrl/admin/users/update-status.json';
+  static const String adminUserUpdateRole =
+      '$baseUrl/admin/users/update-role.json';
+
+  static String adminUserDetails(int id) {
+    return '$baseUrl/admin/users/user-$id.json';
+  }
 }

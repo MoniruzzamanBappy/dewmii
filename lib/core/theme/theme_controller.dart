@@ -1,61 +1,82 @@
 import 'package:flutter/material.dart';
 
-/// Lightweight app-wide theme controller.
-///
-/// It intentionally uses only Flutter SDK APIs so it remains a drop-in file.
-/// When you add persistence later, restore the saved value in [init] and save
-/// the mode inside [_set].
+enum AppThemeVariant {
+  light,
+  dark,
+  serenity,
+  rose,
+  violet,
+  banana,
+  seaFoam,
+  slate,
+}
+
 class ThemeController {
   ThemeController._();
 
-  static final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(
-    ThemeMode.system,
-  );
+  static final ValueNotifier<AppThemeVariant> themeVariant =
+      ValueNotifier<AppThemeVariant>(AppThemeVariant.serenity);
 
   static Future<void> init() async {
-    themeMode.value = ThemeMode.system;
+    themeVariant.value = AppThemeVariant.serenity;
   }
 
-  static void setLight() => _set(ThemeMode.light);
-  static void setDark() => _set(ThemeMode.dark);
-  static void setSystem() => _set(ThemeMode.system);
-
-  static void toggleTheme() {
-    switch (themeMode.value) {
-      case ThemeMode.system:
-      case ThemeMode.light:
-        _set(ThemeMode.dark);
-      case ThemeMode.dark:
-        _set(ThemeMode.light);
-    }
+  static void setTheme(AppThemeVariant variant) {
+    if (themeVariant.value == variant) return;
+    themeVariant.value = variant;
   }
 
   static bool isDarkMode(BuildContext context) {
-    return switch (themeMode.value) {
-      ThemeMode.dark => true,
-      ThemeMode.light => false,
-      ThemeMode.system =>
-        MediaQuery.platformBrightnessOf(context) == Brightness.dark,
-    };
+    return themeVariant.value == AppThemeVariant.dark;
   }
 
-  static IconData toggleIcon(BuildContext context) {
-    return isDarkMode(context)
-        ? Icons.light_mode_rounded
-        : Icons.dark_mode_rounded;
+  static IconData currentIcon() {
+    switch (themeVariant.value) {
+      case AppThemeVariant.light:
+        return Icons.light_mode_rounded;
+      case AppThemeVariant.dark:
+        return Icons.dark_mode_rounded;
+      case AppThemeVariant.serenity:
+        return Icons.water_drop_rounded;
+      case AppThemeVariant.rose:
+        return Icons.favorite_rounded;
+      case AppThemeVariant.violet:
+        return Icons.auto_awesome_rounded;
+      case AppThemeVariant.banana:
+        return Icons.wb_sunny_rounded;
+      case AppThemeVariant.seaFoam:
+        return Icons.spa_rounded;
+      case AppThemeVariant.slate:
+        return Icons.layers_rounded;
+    }
   }
 
-  static String toggleTooltip(BuildContext context) {
-    return isDarkMode(context) ? 'Switch to light mode' : 'Switch to dark mode';
+  static String currentTooltip() {
+    return 'Change theme';
   }
 
-  static String currentLabel(BuildContext context) {
-    if (themeMode.value == ThemeMode.system) return 'System';
-    return isDarkMode(context) ? 'Dark' : 'Light';
+  static String currentLabel() {
+    return variantLabel(themeVariant.value);
   }
 
-  static void _set(ThemeMode mode) {
-    if (themeMode.value == mode) return;
-    themeMode.value = mode;
+  static String variantLabel(AppThemeVariant variant) {
+    switch (variant) {
+      case AppThemeVariant.light:
+        return 'Light';
+      case AppThemeVariant.dark:
+        return 'Dark';
+      case AppThemeVariant.serenity:
+        return 'Serenity';
+      case AppThemeVariant.rose:
+        return 'Rose';
+      case AppThemeVariant.violet:
+        return 'Violet';
+      case AppThemeVariant.banana:
+        return 'Banana';
+      case AppThemeVariant.seaFoam:
+        return 'Sea Foam';
+      case AppThemeVariant.slate:
+        return 'Slate';
+    }
   }
 }

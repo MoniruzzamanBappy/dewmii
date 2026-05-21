@@ -2,31 +2,23 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/theme_controller.dart';
-import '../../../features/cart/screens/cart_screen.dart';
-import '../../../features/home/home_screen.dart';
-import '../../../features/order/screens/my_orders_screen.dart';
-import '../../../features/profile/screens/profile_screen.dart';
-import '../../../features/wishlist/screens/wishlist_screen.dart';
-import 'common_bottom_nav.dart';
+import '../../../features/admin/category_management/screens/admin_category_list_screen.dart';
+import '../../../features/admin/order_management/screens/admin_order_management_screen.dart';
+import '../../../features/admin/product_management/screens/admin_product_management_screen.dart';
+import '../../../features/admin/screens/admin_dashboard_screen.dart';
+import '../../../features/admin/user_management/screens/admin_customer_list_screen.dart';
+import 'admin_bottom_nav.dart';
 
-class MainNavigationShell extends StatefulWidget {
+class AdminNavigationShell extends StatefulWidget {
   final int initialIndex;
 
-  /// Optional per-tab badge counts [home, wishlist, cart, orders, profile].
-  /// Pass null for no badge, 0 for dot, positive int for count.
-  final List<int?> badgeCounts;
-
-  const MainNavigationShell({
-    super.key,
-    this.initialIndex = 0,
-    this.badgeCounts = const [null, null, null, null, null],
-  });
+  const AdminNavigationShell({super.key, this.initialIndex = 0});
 
   @override
-  State<MainNavigationShell> createState() => _MainNavigationShellState();
+  State<AdminNavigationShell> createState() => _AdminNavigationShellState();
 }
 
-class _MainNavigationShellState extends State<MainNavigationShell> {
+class _AdminNavigationShellState extends State<AdminNavigationShell> {
   static const int _tabCount = 5;
 
   int _currentIndex = 0;
@@ -36,24 +28,24 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
 
   final List<Widget> _screens = const [
     KeyedSubtree(
-      key: PageStorageKey('home-tab'),
-      child: HomeScreen(showCommonScaffold: false),
+      key: PageStorageKey('admin-dashboard-tab'),
+      child: AdminDashboardScreen(),
     ),
     KeyedSubtree(
-      key: PageStorageKey('wishlist-tab'),
-      child: WishlistScreen(showCommonScaffold: false),
+      key: PageStorageKey('admin-products-tab'),
+      child: AdminProductManagementScreen(showCommonScaffold: false),
     ),
     KeyedSubtree(
-      key: PageStorageKey('cart-tab'),
-      child: CartScreen(showCommonScaffold: false),
+      key: PageStorageKey('admin-categories-tab'),
+      child: AdminCategoryListScreen(showCommonScaffold: false),
     ),
     KeyedSubtree(
-      key: PageStorageKey('orders-tab'),
-      child: MyOrdersScreen(showCommonScaffold: false),
+      key: PageStorageKey('admin-orders-tab'),
+      child: AdminOrderManagementScreen(showCommonScaffold: false),
     ),
     KeyedSubtree(
-      key: PageStorageKey('profile-tab'),
-      child: ProfileScreen(showCommonScaffold: false),
+      key: PageStorageKey('admin-users-tab'),
+      child: AdminCustomerListScreen(showCommonScaffold: false),
     ),
   ];
 
@@ -64,7 +56,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   }
 
   @override
-  void didUpdateWidget(covariant MainNavigationShell oldWidget) {
+  void didUpdateWidget(covariant AdminNavigationShell oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.initialIndex != widget.initialIndex) {
@@ -117,7 +109,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
                 final isActive = index == _currentIndex;
                 final direction = _currentIndex >= _previousIndex ? 1.0 : -1.0;
 
-                return _AnimatedTabLayer(
+                return _AnimatedAdminTabLayer(
                   active: isActive,
                   offsetX: isActive ? 0 : 0.018 * direction,
                   child: IgnorePointer(
@@ -132,22 +124,21 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             ),
           ),
         ),
-        bottomNavigationBar: CommonBottomNav(
+        bottomNavigationBar: AdminBottomNav(
           currentIndex: _currentIndex,
           onTap: _changeTab,
-          badgeCounts: widget.badgeCounts,
         ),
       ),
     );
   }
 }
 
-class _AnimatedTabLayer extends StatelessWidget {
+class _AnimatedAdminTabLayer extends StatelessWidget {
   final bool active;
   final double offsetX;
   final Widget child;
 
-  const _AnimatedTabLayer({
+  const _AnimatedAdminTabLayer({
     required this.active,
     required this.offsetX,
     required this.child,

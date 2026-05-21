@@ -1,73 +1,55 @@
 import 'dart:ui';
 
-import 'package:dewmii/core/theme/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_theme_palette.dart';
+import '../../../core/theme/theme_controller.dart';
 
-class NavItem {
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
-  final int? badgeCount;
-
-  const NavItem({
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-    this.badgeCount,
-  });
-}
-
-class CommonBottomNav extends StatelessWidget {
+class AdminBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
-  final List<int?> badgeCounts;
 
-  static const List<NavItem> _items = [
-    NavItem(
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home_rounded,
-      label: 'Home',
-    ),
-    NavItem(
-      icon: Icons.favorite_border_rounded,
-      selectedIcon: Icons.favorite_rounded,
-      label: 'Wishlist',
-    ),
-    NavItem(
-      icon: Icons.shopping_bag_outlined,
-      selectedIcon: Icons.shopping_bag_rounded,
-      label: 'Cart',
-    ),
-    NavItem(
-      icon: Icons.receipt_long_outlined,
-      selectedIcon: Icons.receipt_long_rounded,
-      label: 'Orders',
-    ),
-    NavItem(
-      icon: Icons.person_outline_rounded,
-      selectedIcon: Icons.person_rounded,
-      label: 'Profile',
-    ),
-  ];
-
-  const CommonBottomNav({
+  const AdminBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
-    this.badgeCounts = const [null, null, null, null, null],
   });
+
+  static const List<_AdminNavItem> _items = [
+    _AdminNavItem(
+      label: 'Dashboard',
+      icon: Icons.dashboard_outlined,
+      activeIcon: Icons.dashboard_rounded,
+    ),
+    _AdminNavItem(
+      label: 'Products',
+      icon: Icons.inventory_2_outlined,
+      activeIcon: Icons.inventory_2_rounded,
+    ),
+    _AdminNavItem(
+      label: 'Categories',
+      icon: Icons.category_outlined,
+      activeIcon: Icons.category_rounded,
+    ),
+    _AdminNavItem(
+      label: 'Orders',
+      icon: Icons.receipt_long_outlined,
+      activeIcon: Icons.receipt_long_rounded,
+    ),
+    _AdminNavItem(
+      label: 'Users',
+      icon: Icons.people_outline_rounded,
+      activeIcon: Icons.people_rounded,
+    ),
+  ];
 
   void _handleTap(int index) {
     HapticFeedback.lightImpact();
     onTap(index);
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AppThemeVariant>(
@@ -150,15 +132,10 @@ class CommonBottomNav extends StatelessWidget {
                         ),
                         Row(
                           children: List.generate(_items.length, (index) {
-                            final badge = index < badgeCounts.length
-                                ? badgeCounts[index]
-                                : null;
-
                             return Expanded(
-                              child: _NavDestination(
+                              child: _AdminNavDestination(
                                 item: _items[index],
                                 selected: index == currentIndex,
-                                badge: badge,
                                 palette: palette,
                                 onTap: () => _handleTap(index),
                               ),
@@ -178,26 +155,24 @@ class CommonBottomNav extends StatelessWidget {
   }
 }
 
-class _NavDestination extends StatefulWidget {
-  final NavItem item;
+class _AdminNavDestination extends StatefulWidget {
+  final _AdminNavItem item;
   final bool selected;
-  final int? badge;
   final AppThemePalette palette;
   final VoidCallback onTap;
 
-  const _NavDestination({
+  const _AdminNavDestination({
     required this.item,
     required this.selected,
-    required this.badge,
     required this.palette,
     required this.onTap,
   });
 
   @override
-  State<_NavDestination> createState() => _NavDestinationState();
+  State<_AdminNavDestination> createState() => _AdminNavDestinationState();
 }
 
-class _NavDestinationState extends State<_NavDestination>
+class _AdminNavDestinationState extends State<_AdminNavDestination>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scale;
@@ -222,7 +197,7 @@ class _NavDestinationState extends State<_NavDestination>
   }
 
   @override
-  void didUpdateWidget(covariant _NavDestination oldWidget) {
+  void didUpdateWidget(covariant _AdminNavDestination oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.selected != oldWidget.selected) {
@@ -268,14 +243,11 @@ class _NavDestinationState extends State<_NavDestination>
                     child: ScaleTransition(scale: animation, child: child),
                   );
                 },
-                child: _BadgedIcon(
-                  key: ValueKey(widget.selected),
-                  icon: widget.selected
-                      ? widget.item.selectedIcon
-                      : widget.item.icon,
+                child: Icon(
+                  widget.selected ? widget.item.activeIcon : widget.item.icon,
+                  key: ValueKey('${widget.item.label}-${widget.selected}'),
                   color: color,
-                  badge: widget.badge,
-                  palette: widget.palette,
+                  size: 24,
                 ),
               ),
             ),
@@ -302,97 +274,14 @@ class _NavDestinationState extends State<_NavDestination>
   }
 }
 
-class _BadgedIcon extends StatelessWidget {
+class _AdminNavItem {
+  final String label;
   final IconData icon;
-  final Color color;
-  final int? badge;
-  final AppThemePalette palette;
+  final IconData activeIcon;
 
-  const _BadgedIcon({
-    super.key,
+  const _AdminNavItem({
+    required this.label,
     required this.icon,
-    required this.color,
-    required this.badge,
-    required this.palette,
+    required this.activeIcon,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Icon(icon, color: color, size: 24),
-        if (badge != null)
-          Positioned(
-            top: -6,
-            right: -8,
-            child: _Badge(count: badge!, palette: palette),
-          ),
-      ],
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final int count;
-  final AppThemePalette palette;
-
-  const _Badge({required this.count, required this.palette});
-
-  @override
-  Widget build(BuildContext context) {
-    if (count == 0) {
-      return _BadgeShell(
-        palette: palette,
-        child: const SizedBox(width: 8, height: 8),
-      );
-    }
-
-    return _BadgeShell(
-      palette: palette,
-      background: palette.surface,
-      child: Text(
-        count > 99 ? '99+' : '$count',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w900,
-          height: 1.1,
-        ),
-      ),
-    );
-  }
-}
-
-class _BadgeShell extends StatelessWidget {
-  final Widget child;
-  final AppThemePalette palette;
-  final Color? background;
-
-  const _BadgeShell({
-    required this.child,
-    required this.palette,
-    this.background,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.3, end: 1),
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.elasticOut,
-      builder: (_, scale, child) => Transform.scale(scale: scale, child: child),
-      child: Container(
-        padding: background == null
-            ? EdgeInsets.zero
-            : const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-        decoration: BoxDecoration(
-          color: AppColors.error,
-          borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-          border: Border.all(color: palette.surface, width: 1.7),
-        ),
-        child: child,
-      ),
-    );
-  }
 }

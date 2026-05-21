@@ -46,6 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void initState() {
     super.initState();
+
     _pageController = PageController();
 
     _floatingController = AnimationController(
@@ -63,12 +64,13 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       curve: Curves.easeOut,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, .08),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, .08), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _entranceController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
   }
 
   @override
@@ -82,11 +84,12 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   bool get _isLastPage => _currentIndex == _items.length - 1;
 
   void _goToLogin() {
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
-  }
+    if (!mounted) return;
 
-  void _goToRegister() {
-    Navigator.pushNamed(context, AppRoutes.register);
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).pushNamedAndRemoveUntil(AppRoutes.login, (route) => false);
   }
 
   void _nextPage() {
@@ -116,7 +119,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               ? const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF101827), Color(0xFF172033), Color(0xFF0F172A)],
+                  colors: [
+                    Color(0xFF101827),
+                    Color(0xFF172033),
+                    Color(0xFF0F172A),
+                  ],
                 )
               : AppColors.primaryGradient,
         ),
@@ -124,32 +131,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
           child: Stack(
             children: [
               const _BackgroundGlow(),
-              Positioned(
-                top: 12,
-                right: 18,
-                child: AnimatedOpacity(
-                  opacity: _isLastPage ? 0 : 1,
-                  duration: const Duration(milliseconds: 250),
-                  child: IgnorePointer(
-                    ignoring: _isLastPage,
-                    child: TextButton(
-                      onPressed: _goToLogin,
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.white.withValues(alpha: .16),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      child: const Text('Skip'),
-                    ),
-                  ),
-                ),
-              ),
+
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: SlideTransition(
@@ -166,20 +148,28 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           itemCount: _items.length,
                           itemBuilder: (context, index) {
                             final item = _items[index];
+
                             return Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 48, 24, 12),
+                              padding: const EdgeInsets.fromLTRB(
+                                24,
+                                48,
+                                24,
+                                12,
+                              ),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   AnimatedBuilder(
                                     animation: _floatingController,
                                     builder: (context, child) {
-                                      final offset = lerpDouble(
+                                      final offset =
+                                          lerpDouble(
                                             -8,
                                             8,
                                             _floatingController.value,
                                           ) ??
                                           0;
+
                                       return Transform.translate(
                                         offset: Offset(0, offset),
                                         child: child,
@@ -190,7 +180,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       size: size.width < 360 ? 150 : 178,
                                     ),
                                   ),
+
                                   const SizedBox(height: 42),
+
                                   AnimatedSwitcher(
                                     duration: const Duration(milliseconds: 320),
                                     transitionBuilder: (child, animation) {
@@ -211,20 +203,26 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                         Text(
                                           item.title,
                                           textAlign: TextAlign.center,
-                                          style: theme.textTheme.headlineMedium?.copyWith(
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: -.8,
-                                            color: Colors.white,
-                                          ),
+                                          style: theme.textTheme.headlineMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: -.8,
+                                                color: Colors.white,
+                                              ),
                                         ),
+
                                         const SizedBox(height: 14),
+
                                         Text(
                                           item.subtitle,
                                           textAlign: TextAlign.center,
-                                          style: theme.textTheme.bodyLarge?.copyWith(
-                                            height: 1.55,
-                                            color: Colors.white.withValues(alpha: .82),
-                                          ),
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(
+                                                height: 1.55,
+                                                color: Colors.white.withValues(
+                                                  alpha: .82,
+                                                ),
+                                              ),
                                         ),
                                       ],
                                     ),
@@ -235,6 +233,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                           },
                         ),
                       ),
+
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 26),
                         child: ClipRRect(
@@ -257,7 +256,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                     itemCount: _items.length,
                                     currentIndex: _currentIndex,
                                   ),
+
                                   const SizedBox(height: 18),
+
                                   SizedBox(
                                     width: double.infinity,
                                     height: 56,
@@ -268,11 +269,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                         backgroundColor: Colors.white,
                                         foregroundColor: AppColors.primary,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18),
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
                                         ),
                                       ),
                                       child: AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 220),
+                                        duration: const Duration(
+                                          milliseconds: 220,
+                                        ),
                                         child: Text(
                                           _isLastPage ? 'Get Started' : 'Next',
                                           key: ValueKey(_isLastPage),
@@ -284,24 +289,32 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                                       ),
                                     ),
                                   ),
+
                                   const SizedBox(height: 12),
+
                                   SizedBox(
                                     width: double.infinity,
                                     height: 54,
                                     child: OutlinedButton(
-                                      onPressed: _goToRegister,
+                                      onPressed: _goToLogin,
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: Colors.white,
                                         side: BorderSide(
-                                          color: Colors.white.withValues(alpha: .45),
+                                          color: Colors.white.withValues(
+                                            alpha: .45,
+                                          ),
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(18),
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
                                         ),
                                       ),
                                       child: const Text(
-                                        'Create Account',
-                                        style: TextStyle(fontWeight: FontWeight.w800),
+                                        'Log In',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -315,6 +328,33 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   ),
                 ),
               ),
+
+              if (!_isLastPage)
+                Positioned(
+                  top: 12,
+                  right: 18,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: TextButton(
+                      onPressed: _goToLogin,
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.white.withValues(alpha: .16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -382,6 +422,7 @@ class _PageIndicator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(itemCount, (index) {
         final selected = index == currentIndex;
+
         return AnimatedContainer(
           duration: const Duration(milliseconds: 260),
           curve: Curves.easeOutCubic,
@@ -403,7 +444,7 @@ class _BackgroundGlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return const Stack(
       children: [
         Positioned(
           top: -70,
@@ -433,12 +474,14 @@ class _GlowCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: opacity),
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: opacity),
+        ),
       ),
     );
   }

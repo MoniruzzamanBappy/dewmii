@@ -1,31 +1,35 @@
+import 'package:dewmii/shared/widgets/admin_navigation/admin_navigation_shell.dart';
 import 'package:flutter/material.dart';
 
-import '../../../app/routes.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/widgets/app_toast.dart';
-import '../services/auth_api_service.dart';
-import '../widgets/auth_text_field.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
+import '../services/admin_api_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class AdminLoginScreen extends StatefulWidget {
+  const AdminLoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<AdminLoginScreen> createState() => _AdminLoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
+class _AdminLoginScreenState extends State<AdminLoginScreen>
     with SingleTickerProviderStateMixin {
-  final emailController = TextEditingController(text: 'rahim@example.com');
-  final passwordController = TextEditingController(text: '123456');
+  final AdminApiService service = AdminApiService();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController(
+    text: 'admin@example.com',
+  );
+
+  final TextEditingController passwordController = TextEditingController(
+    text: 'password',
+  );
 
   late final AnimationController _controller;
   late final Animation<double> _fade;
 
   bool isLoading = false;
+  bool obscurePassword = true;
 
   @override
   void initState() {
@@ -39,34 +43,38 @@ class _LoginScreenState extends State<LoginScreen>
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
   }
 
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> login() async {
-    if (!formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
     FocusScope.of(context).unfocus();
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      final service = AuthApiService();
-
-      final response = await service.login(
+      final result = await service.login(
         email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+        password: passwordController.text,
       );
 
       if (!mounted) return;
 
       AppToast.show(
         context,
-        message: response.message,
+        message: result.message.isEmpty ? 'Welcome back' : result.message,
         type: ToastType.success,
       );
 
-      Navigator.pushNamedAndRemoveUntil(
+      Navigator.pushAndRemoveUntil(
         context,
-        AppRoutes.main,
+        MaterialPageRoute(builder: (_) => const AdminNavigationShell()),
         (route) => false,
       );
     } catch (error) {
@@ -79,33 +87,13 @@ class _LoginScreenState extends State<LoginScreen>
       );
     } finally {
       if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
+        setState(() => isLoading = false);
       }
     }
   }
 
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _openRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-    );
-  }
-
-  void _openForgotPassword() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-    );
+  void _goToCustomerLogin() {
+    Navigator.pop(context);
   }
 
   @override
@@ -150,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen>
                       ],
                     ),
                     child: Form(
-                      key: formKey,
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -164,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 borderRadius: BorderRadius.circular(26),
                               ),
                               child: const Icon(
-                                Icons.lock_person_rounded,
+                                Icons.admin_panel_settings_rounded,
                                 color: Colors.white,
                                 size: 36,
                               ),
@@ -175,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const Center(
                             child: Text(
-                              'Welcome Back',
+                              'Admin Console',
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w900,
@@ -187,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen>
 
                           Center(
                             child: Text(
-                              'Login to continue shopping with Dewmii',
+                              'Manage orders, products, sales and customers',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: isDark
@@ -199,12 +187,14 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 28),
 
-                          AuthTextField(
-                            label: 'Email address',
-                            hintText: 'Enter your email',
+                          TextFormField(
                             controller: emailController,
                             keyboardType: TextInputType.emailAddress,
-                            prefixIcon: const Icon(Icons.mail_outline_rounded),
+                            textInputAction: TextInputAction.next,
+                            decoration: const InputDecoration(
+                              prefixIcon: Icon(Icons.mail_outline_rounded),
+                              labelText: 'Email address',
+                            ),
                             validator: (value) {
                               final text = value?.trim() ?? '';
 
@@ -222,12 +212,30 @@ class _LoginScreenState extends State<LoginScreen>
 
                           const SizedBox(height: 14),
 
-                          AuthTextField(
-                            label: 'Password',
-                            hintText: 'Enter your password',
+                          TextFormField(
                             controller: passwordController,
-                            obscureText: true,
-                            prefixIcon: const Icon(Icons.lock_outline_rounded),
+                            obscureText: obscurePassword,
+                            maxLines: 1,
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => login(),
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(
+                                Icons.lock_outline_rounded,
+                              ),
+                              labelText: 'Password',
+                              suffixIcon: IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    obscurePassword = !obscurePassword;
+                                  });
+                                },
+                                icon: Icon(
+                                  obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
+                            ),
                             validator: (value) {
                               final text = value ?? '';
 
@@ -235,25 +243,15 @@ class _LoginScreenState extends State<LoginScreen>
                                 return 'Password is required';
                               }
 
-                              if (text.length < 6) {
-                                return 'Password must be at least 6 characters';
+                              if (text.length < 4) {
+                                return 'Password must be at least 4 characters';
                               }
 
                               return null;
                             },
                           ),
 
-                          const SizedBox(height: 8),
-
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: _openForgotPassword,
-                              child: const Text('Forgot Password?'),
-                            ),
-                          ),
-
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 22),
 
                           SizedBox(
                             width: double.infinity,
@@ -270,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     )
                                   : const Icon(Icons.login_rounded),
                               label: Text(
-                                isLoading ? 'Signing in...' : 'Log In',
+                                isLoading ? 'Signing in...' : 'Sign In',
                               ),
                             ),
                           ),
@@ -280,28 +278,10 @@ class _LoginScreenState extends State<LoginScreen>
                           SizedBox(
                             width: double.infinity,
                             height: 52,
-                            child: OutlinedButton(
-                              onPressed: _openRegister,
-                              child: const Text('Create new account'),
-                            ),
-                          ),
-
-                          const SizedBox(height: 10),
-
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: TextButton.icon(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRoutes.adminLogin,
-                                );
-                              },
-                              icon: const Icon(
-                                Icons.admin_panel_settings_rounded,
-                              ),
-                              label: const Text('Admin Login'),
+                            child: OutlinedButton.icon(
+                              onPressed: _goToCustomerLogin,
+                              icon: const Icon(Icons.person_rounded),
+                              label: const Text('Customer Login'),
                             ),
                           ),
                         ],
