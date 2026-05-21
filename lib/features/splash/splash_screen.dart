@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:dewmii/app/routes.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_strings.dart';
+import '../../core/theme/app_theme_palette.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,11 +16,15 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
+  static const String _logoPath = 'assets/images/logo.png';
+
   late final AnimationController _introController;
   late final AnimationController _pulseController;
+
   late final Animation<double> _logoScale;
   late final Animation<double> _logoOpacity;
   late final Animation<Offset> _titleOffset;
+
   Timer? _navigationTimer;
 
   @override
@@ -46,15 +51,13 @@ class _SplashScreenState extends State<SplashScreen>
       curve: const Interval(0, .65, curve: Curves.easeOut),
     );
 
-    _titleOffset = Tween<Offset>(
-      begin: const Offset(0, .25),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _introController,
-        curve: const Interval(.25, 1, curve: Curves.easeOutCubic),
-      ),
-    );
+    _titleOffset = Tween<Offset>(begin: const Offset(0, .25), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _introController,
+            curve: const Interval(.25, 1, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _introController.forward();
 
@@ -75,220 +78,219 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final colorScheme = theme.colorScheme;
+    final palette = context.palette;
     final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? const [
-                    Color(0xFF100811),
-                    Color(0xFF201128),
-                    Color(0xFF331923),
-                  ]
-                : const [
-                    Color(0xFFFFFBF8),
-                    Color(0xFFFFEEF5),
-                    Color(0xFFFFE4D9),
-                  ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -size.width * .22,
-              right: -size.width * .2,
-              child: _GlowOrb(
-                size: size.width * .68,
-                color: colorScheme.primary.withValues(alpha: isDark ? .2 : .16),
+      backgroundColor: palette.background,
+      body: SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: palette.heroGradient),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                top: -size.width * .22,
+                right: -size.width * .20,
+                child: _GlowOrb(
+                  size: size.width * .68,
+                  color: palette.primary.withValues(
+                    alpha: palette.isDark ? .22 : .18,
+                  ),
+                ),
               ),
-            ),
-            Positioned(
-              left: -size.width * .28,
-              bottom: size.height * .04,
-              child: _GlowOrb(
-                size: size.width * .82,
-                color: const Color(0xFFFF7A59).withValues(alpha: isDark ? .16 : .13),
+
+              Positioned(
+                left: -size.width * .28,
+                bottom: size.height * .04,
+                child: _GlowOrb(
+                  size: size.width * .82,
+                  color: palette.accent.withValues(
+                    alpha: palette.isDark ? .16 : .13,
+                  ),
+                ),
               ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
-                child: Column(
-                  children: [
-                    const Spacer(),
-                    AnimatedBuilder(
-                      animation: Listenable.merge([
-                        _introController,
-                        _pulseController,
-                      ]),
-                      builder: (context, child) {
-                        final pulse = 1 + (_pulseController.value * .045);
-                        return Opacity(
-                          opacity: _logoOpacity.value,
-                          child: Transform.scale(
-                            scale: _logoScale.value * pulse,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: _BrandMark(
-                        foregroundColor: isDark
-                            ? Colors.white
-                            : const Color(0xFF1E0D16),
-                        accentColor: colorScheme.primary,
+
+              Positioned(
+                top: size.height * .22,
+                left: -size.width * .18,
+                child: _GlowOrb(
+                  size: size.width * .42,
+                  color: Colors.white.withValues(
+                    alpha: palette.isDark ? .05 : .20,
+                  ),
+                ),
+              ),
+
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: Column(
+                    children: [
+                      const Spacer(),
+
+                      AnimatedBuilder(
+                        animation: Listenable.merge([
+                          _introController,
+                          _pulseController,
+                        ]),
+                        builder: (context, child) {
+                          final pulse = 1 + (_pulseController.value * .045);
+
+                          return Opacity(
+                            opacity: _logoOpacity.value,
+                            child: Transform.scale(
+                              scale: _logoScale.value * pulse,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _SplashLogo(
+                          logoPath: _logoPath,
+                          primaryColor: palette.primary,
+                          surfaceColor: palette.surface,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 28),
-                    FadeTransition(
-                      opacity: _logoOpacity,
-                      child: SlideTransition(
-                        position: _titleOffset,
+
+                      const SizedBox(height: 28),
+
+                      FadeTransition(
+                        opacity: _logoOpacity,
+                        child: SlideTransition(
+                          position: _titleOffset,
+                          child: Column(
+                            children: [
+                              Text(
+                                AppStrings.appName,
+                                textAlign: TextAlign.center,
+                                style:
+                                    theme.textTheme.displaySmall?.copyWith(
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: -.8,
+                                      color: palette.isDark
+                                          ? Colors.white
+                                          : palette.textPrimary,
+                                    ) ??
+                                    TextStyle(
+                                      fontSize: 38,
+                                      fontWeight: FontWeight.w900,
+                                      color: palette.isDark
+                                          ? Colors.white
+                                          : palette.textPrimary,
+                                    ),
+                              ),
+
+                              const SizedBox(height: 10),
+
+                              Text(
+                                'Shop smarter. Live better.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color:
+                                      (palette.isDark
+                                              ? Colors.white
+                                              : palette.textPrimary)
+                                          .withValues(alpha: .68),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const Spacer(),
+
+                      FadeTransition(
+                        opacity: _logoOpacity,
                         child: Column(
                           children: [
-                            Text(
-                              AppStrings.appName,
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.displaySmall?.copyWith(
-                                    fontWeight: FontWeight.w900,
-                                    letterSpacing: -.8,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF1E0D16),
-                                  ) ??
-                                  TextStyle(
-                                    fontSize: 38,
-                                    fontWeight: FontWeight.w900,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF1E0D16),
-                                  ),
+                            SizedBox(
+                              width: 38,
+                              height: 38,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  palette.primary,
+                                ),
+                                backgroundColor: palette.primary.withValues(
+                                  alpha: .14,
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 10),
+
+                            const SizedBox(height: 14),
+
                             Text(
-                              'Shop smarter. Live better.',
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                color: (isDark
-                                        ? Colors.white
-                                        : const Color(0xFF1E0D16))
-                                    .withValues(alpha: .66),
+                              'Preparing your store...',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: palette.textPrimary.withValues(
+                                  alpha: .62,
+                                ),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    FadeTransition(
-                      opacity: _logoOpacity,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: 38,
-                            height: 38,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary,
-                              ),
-                              backgroundColor: colorScheme.primary.withValues(alpha: .12),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'Preparing your store...',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: .6),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 34),
-                  ],
+
+                      const SizedBox(height: 34),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _BrandMark extends StatelessWidget {
-  const _BrandMark({
-    required this.foregroundColor,
-    required this.accentColor,
-  });
+class _SplashLogo extends StatelessWidget {
+  final String logoPath;
+  final Color primaryColor;
+  final Color surfaceColor;
 
-  final Color foregroundColor;
-  final Color accentColor;
+  const _SplashLogo({
+    required this.logoPath,
+    required this.primaryColor,
+    required this.surfaceColor,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 116,
-      height: 116,
+      width: 126,
+      height: 126,
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(34),
-        color: Colors.white.withValues(alpha: .18),
-        border: Border.all(color: Colors.white.withValues(alpha: .22)),
+        borderRadius: BorderRadius.circular(36),
+        color: surfaceColor.withValues(alpha: .92),
+        border: Border.all(color: Colors.white.withValues(alpha: .32)),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withValues(alpha: .24),
-            blurRadius: 34,
+            color: primaryColor.withValues(alpha: .26),
+            blurRadius: 38,
             offset: const Offset(0, 18),
+          ),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .10),
+            blurRadius: 22,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Transform.rotate(
-            angle: -math.pi / 18,
-            child: Container(
-              width: 62,
-              height: 62,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    accentColor.withValues(alpha: .95),
-                    const Color(0xFFFF7A59),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Icon(
+      child: Image.asset(
+        logoPath,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
             Icons.shopping_bag_rounded,
-            size: 54,
-            color: foregroundColor,
-          ),
-          Positioned(
-            top: 24,
-            right: 29,
-            child: Container(
-              width: 11,
-              height: 11,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
+            size: 58,
+            color: primaryColor,
+          );
+        },
       ),
     );
   }
@@ -303,12 +305,12 @@ class _GlowOrb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
       ),
     );

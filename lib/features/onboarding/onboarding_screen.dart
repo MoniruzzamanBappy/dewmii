@@ -14,6 +14,8 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen>
     with TickerProviderStateMixin {
+  static const String _logoPath = 'assets/images/logo.png';
+
   late final PageController _pageController;
   late final AnimationController _floatingController;
   late final AnimationController _entranceController;
@@ -24,19 +26,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   final List<_OnboardingItem> _items = const [
     _OnboardingItem(
-      icon: Icons.shopping_bag_outlined,
       title: 'Welcome to Dewmii',
       subtitle:
           'Discover beautiful products, trending collections, and everyday essentials in one modern shopping app.',
     ),
     _OnboardingItem(
-      icon: Icons.local_shipping_outlined,
       title: 'Fast & Reliable Delivery',
       subtitle:
           'Track your orders, choose delivery options, and enjoy a smooth shopping journey from cart to doorstep.',
     ),
     _OnboardingItem(
-      icon: Icons.verified_user_outlined,
       title: 'Secure Checkout',
       subtitle:
           'Save addresses, apply coupons, review your order, and pay safely with a clean checkout experience.',
@@ -110,252 +109,259 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final logoSize = size.width < 360 ? 150.0 : 178.0;
+
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF101827),
-                    Color(0xFF172033),
-                    Color(0xFF0F172A),
-                  ],
-                )
-              : AppColors.primaryGradient,
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              const _BackgroundGlow(),
+      body: SizedBox.expand(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: isDark
+                ? const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF101827),
+                      Color(0xFF172033),
+                      Color(0xFF0F172A),
+                    ],
+                  )
+                : AppColors.primaryGradient,
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                const _BackgroundGlow(),
 
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: PageView.builder(
-                          controller: _pageController,
-                          physics: const BouncingScrollPhysics(),
-                          onPageChanged: (index) {
-                            setState(() => _currentIndex = index);
-                          },
-                          itemCount: _items.length,
-                          itemBuilder: (context, index) {
-                            final item = _items[index];
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: SlideTransition(
+                    position: _slideAnimation,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: PageView.builder(
+                            controller: _pageController,
+                            physics: const BouncingScrollPhysics(),
+                            onPageChanged: (index) {
+                              setState(() => _currentIndex = index);
+                            },
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
 
-                            return Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                24,
-                                48,
-                                24,
-                                12,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AnimatedBuilder(
-                                    animation: _floatingController,
-                                    builder: (context, child) {
-                                      final offset =
-                                          lerpDouble(
-                                            -8,
-                                            8,
-                                            _floatingController.value,
-                                          ) ??
-                                          0;
-
-                                      return Transform.translate(
-                                        offset: Offset(0, offset),
-                                        child: child,
-                                      );
-                                    },
-                                    child: _HeroIcon(
-                                      icon: item.icon,
-                                      size: size.width < 360 ? 150 : 178,
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 42),
-
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 320),
-                                    transitionBuilder: (child, animation) {
-                                      return FadeTransition(
-                                        opacity: animation,
-                                        child: SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(.04, 0),
-                                            end: Offset.zero,
-                                          ).animate(animation),
-                                          child: child,
-                                        ),
-                                      );
-                                    },
-                                    child: Column(
-                                      key: ValueKey(item.title),
-                                      children: [
-                                        Text(
-                                          item.title,
-                                          textAlign: TextAlign.center,
-                                          style: theme.textTheme.headlineMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w900,
-                                                letterSpacing: -.8,
-                                                color: Colors.white,
-                                              ),
-                                        ),
-
-                                        const SizedBox(height: 14),
-
-                                        Text(
-                                          item.subtitle,
-                                          textAlign: TextAlign.center,
-                                          style: theme.textTheme.bodyLarge
-                                              ?.copyWith(
-                                                height: 1.55,
-                                                color: Colors.white.withValues(
-                                                  alpha: .82,
-                                                ),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 26),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(30),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: .14),
-                                borderRadius: BorderRadius.circular(30),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: .22),
+                              return Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  48,
+                                  24,
+                                  12,
                                 ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  _PageIndicator(
-                                    itemCount: _items.length,
-                                    currentIndex: _currentIndex,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    AnimatedBuilder(
+                                      animation: _floatingController,
+                                      builder: (context, child) {
+                                        final offset =
+                                            lerpDouble(
+                                              -8,
+                                              8,
+                                              _floatingController.value,
+                                            ) ??
+                                            0;
+
+                                        return Transform.translate(
+                                          offset: Offset(0, offset),
+                                          child: child,
+                                        );
+                                      },
+                                      child: _OnboardingLogo(
+                                        size: logoSize,
+                                        logoPath: _logoPath,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 42),
+
+                                    AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 320,
+                                      ),
+                                      transitionBuilder: (child, animation) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(.04, 0),
+                                              end: Offset.zero,
+                                            ).animate(animation),
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: Column(
+                                        key: ValueKey(item.title),
+                                        children: [
+                                          Text(
+                                            item.title,
+                                            textAlign: TextAlign.center,
+                                            style: theme
+                                                .textTheme
+                                                .headlineMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w900,
+                                                  letterSpacing: -.8,
+                                                  color: Colors.white,
+                                                ),
+                                          ),
+
+                                          const SizedBox(height: 14),
+
+                                          Text(
+                                            item.subtitle,
+                                            textAlign: TextAlign.center,
+                                            style: theme.textTheme.bodyLarge
+                                                ?.copyWith(
+                                                  height: 1.55,
+                                                  color: Colors.white
+                                                      .withValues(alpha: .82),
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 26),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: .14),
+                                  borderRadius: BorderRadius.circular(30),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: .22),
                                   ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _PageIndicator(
+                                      itemCount: _items.length,
+                                      currentIndex: _currentIndex,
+                                    ),
 
-                                  const SizedBox(height: 18),
+                                    const SizedBox(height: 18),
 
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 56,
-                                    child: ElevatedButton(
-                                      onPressed: _nextPage,
-                                      style: ElevatedButton.styleFrom(
-                                        elevation: 0,
-                                        backgroundColor: Colors.white,
-                                        foregroundColor: AppColors.primary,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            18,
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 56,
+                                      child: ElevatedButton(
+                                        onPressed: _nextPage,
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          backgroundColor: Colors.white,
+                                          foregroundColor: AppColors.primary,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
+                                        ),
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 220,
+                                          ),
+                                          child: Text(
+                                            _isLastPage
+                                                ? 'Get Started'
+                                                : 'Next',
+                                            key: ValueKey(_isLastPage),
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                      child: AnimatedSwitcher(
-                                        duration: const Duration(
-                                          milliseconds: 220,
+                                    ),
+
+                                    const SizedBox(height: 12),
+
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 54,
+                                      child: OutlinedButton(
+                                        onPressed: _goToLogin,
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          side: BorderSide(
+                                            color: Colors.white.withValues(
+                                              alpha: .45,
+                                            ),
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
                                         ),
-                                        child: Text(
-                                          _isLastPage ? 'Get Started' : 'Next',
-                                          key: ValueKey(_isLastPage),
-                                          style: const TextStyle(
-                                            fontSize: 16,
+                                        child: const Text(
+                                          'Log In',
+                                          style: TextStyle(
                                             fontWeight: FontWeight.w800,
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-
-                                  const SizedBox(height: 12),
-
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 54,
-                                    child: OutlinedButton(
-                                      onPressed: _goToLogin,
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        side: BorderSide(
-                                          color: Colors.white.withValues(
-                                            alpha: .45,
-                                          ),
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                        ),
-                                      ),
-                                      child: const Text(
-                                        'Log In',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              if (!_isLastPage)
-                Positioned(
-                  top: 12,
-                  right: 18,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: TextButton(
-                      onPressed: _goToLogin,
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.white.withValues(alpha: .16),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      child: const Text(
-                        'Skip',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
+                      ],
                     ),
                   ),
                 ),
-            ],
+
+                if (!_isLastPage)
+                  Positioned(
+                    top: 12,
+                    right: 18,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: TextButton(
+                        onPressed: _goToLogin,
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.white.withValues(alpha: .16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                        child: const Text(
+                          'Skip',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -363,17 +369,18 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   }
 }
 
-class _HeroIcon extends StatelessWidget {
-  const _HeroIcon({required this.icon, required this.size});
-
-  final IconData icon;
+class _OnboardingLogo extends StatelessWidget {
   final double size;
+  final String logoPath;
+
+  const _OnboardingLogo({required this.size, required this.logoPath});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size,
       height: size,
+      padding: EdgeInsets.all(size * 0.18),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -381,7 +388,7 @@ class _HeroIcon extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Colors.white.withValues(alpha: .98),
-            Colors.white.withValues(alpha: .72),
+            Colors.white.withValues(alpha: .74),
           ],
         ),
         boxShadow: [
@@ -392,19 +399,16 @@ class _HeroIcon extends StatelessWidget {
           ),
         ],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: size * .68,
-            height: size * .68,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: .10),
-              shape: BoxShape.circle,
-            ),
-          ),
-          Icon(icon, size: size * .38, color: AppColors.primary),
-        ],
+      child: Image.asset(
+        logoPath,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(
+            Icons.shopping_bag_rounded,
+            size: size * .38,
+            color: AppColors.primary,
+          );
+        },
       ),
     );
   }
@@ -488,13 +492,8 @@ class _GlowCircle extends StatelessWidget {
 }
 
 class _OnboardingItem {
-  const _OnboardingItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
+  const _OnboardingItem({required this.title, required this.subtitle});
 
-  final IconData icon;
   final String title;
   final String subtitle;
 }
