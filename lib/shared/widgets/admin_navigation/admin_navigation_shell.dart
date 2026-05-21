@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/theme/app_theme_palette.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../features/admin/category_management/screens/admin_category_list_screen.dart';
 import '../../../features/admin/order_management/screens/admin_order_management_screen.dart';
@@ -90,45 +90,49 @@ class _AdminNavigationShellState extends State<AdminNavigationShell> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ThemeController.isDarkMode(context);
-    final background = isDark
-        ? AppColors.darkBackground
-        : AppColors.lightBackground;
+    return ValueListenableBuilder<AppThemeVariant>(
+      valueListenable: ThemeController.themeVariant,
+      builder: (context, _, _) {
+        final palette = context.palette;
 
-    return WillPopScope(
-      onWillPop: _handleBack,
-      child: Scaffold(
-        extendBody: false,
-        backgroundColor: background,
-        body: ColoredBox(
-          color: background,
-          child: PageStorage(
-            bucket: _bucket,
-            child: Stack(
-              children: List.generate(_tabCount, (index) {
-                final isActive = index == _currentIndex;
-                final direction = _currentIndex >= _previousIndex ? 1.0 : -1.0;
+        return WillPopScope(
+          onWillPop: _handleBack,
+          child: Scaffold(
+            extendBody: false,
+            backgroundColor: palette.background,
+            body: ColoredBox(
+              color: palette.background,
+              child: PageStorage(
+                bucket: _bucket,
+                child: Stack(
+                  children: List.generate(_tabCount, (index) {
+                    final isActive = index == _currentIndex;
+                    final direction = _currentIndex >= _previousIndex
+                        ? 1.0
+                        : -1.0;
 
-                return _AnimatedAdminTabLayer(
-                  active: isActive,
-                  offsetX: isActive ? 0 : 0.018 * direction,
-                  child: IgnorePointer(
-                    ignoring: !isActive,
-                    child: TickerMode(
-                      enabled: isActive,
-                      child: _screens[index],
-                    ),
-                  ),
-                );
-              }),
+                    return _AnimatedAdminTabLayer(
+                      active: isActive,
+                      offsetX: isActive ? 0 : 0.018 * direction,
+                      child: IgnorePointer(
+                        ignoring: !isActive,
+                        child: TickerMode(
+                          enabled: isActive,
+                          child: _screens[index],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+            bottomNavigationBar: AdminBottomNav(
+              currentIndex: _currentIndex,
+              onTap: _changeTab,
             ),
           ),
-        ),
-        bottomNavigationBar: AdminBottomNav(
-          currentIndex: _currentIndex,
-          onTap: _changeTab,
-        ),
-      ),
+        );
+      },
     );
   }
 }

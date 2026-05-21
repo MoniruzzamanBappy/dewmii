@@ -20,26 +20,31 @@ class AdminBottomNav extends StatelessWidget {
   static const List<_AdminNavItem> _items = [
     _AdminNavItem(
       label: 'Dashboard',
+      shortLabel: 'Dash',
       icon: Icons.dashboard_outlined,
       activeIcon: Icons.dashboard_rounded,
     ),
     _AdminNavItem(
       label: 'Products',
+      shortLabel: 'Products',
       icon: Icons.inventory_2_outlined,
       activeIcon: Icons.inventory_2_rounded,
     ),
     _AdminNavItem(
       label: 'Categories',
+      shortLabel: 'Cats',
       icon: Icons.category_outlined,
       activeIcon: Icons.category_rounded,
     ),
     _AdminNavItem(
       label: 'Orders',
+      shortLabel: 'Orders',
       icon: Icons.receipt_long_outlined,
       activeIcon: Icons.receipt_long_rounded,
     ),
     _AdminNavItem(
       label: 'Users',
+      shortLabel: 'Users',
       icon: Icons.people_outline_rounded,
       activeIcon: Icons.people_rounded,
     ),
@@ -71,7 +76,7 @@ class AdminBottomNav extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                 decoration: BoxDecoration(
                   color: palette.surface.withValues(
-                    alpha: palette.isDark ? 0.86 : 0.92,
+                    alpha: palette.isDark ? 0.86 : 0.94,
                   ),
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(
@@ -97,6 +102,7 @@ class AdminBottomNav extends StatelessWidget {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = constraints.maxWidth / _items.length;
+                    final useShortLabel = itemWidth < 68;
 
                     return Stack(
                       children: [
@@ -137,6 +143,7 @@ class AdminBottomNav extends StatelessWidget {
                                 item: _items[index],
                                 selected: index == currentIndex,
                                 palette: palette,
+                                useShortLabel: useShortLabel,
                                 onTap: () => _handleTap(index),
                               ),
                             );
@@ -159,12 +166,14 @@ class _AdminNavDestination extends StatefulWidget {
   final _AdminNavItem item;
   final bool selected;
   final AppThemePalette palette;
+  final bool useShortLabel;
   final VoidCallback onTap;
 
   const _AdminNavDestination({
     required this.item,
     required this.selected,
     required this.palette,
+    required this.useShortLabel,
     required this.onTap,
   });
 
@@ -187,8 +196,8 @@ class _AdminNavDestinationState extends State<_AdminNavDestination>
     );
 
     _scale = Tween<double>(
-      begin: 0.92,
-      end: 1.08,
+      begin: 0.94,
+      end: 1.10,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     if (widget.selected) {
@@ -220,54 +229,94 @@ class _AdminNavDestinationState extends State<_AdminNavDestination>
     final active = widget.palette.primary;
     final inactive = widget.palette.muted;
     final color = widget.selected ? active : inactive;
+    final label = widget.useShortLabel
+        ? widget.item.shortLabel
+        : widget.item.label;
 
     return Semantics(
       selected: widget.selected,
       button: true,
       label: widget.item.label,
-      child: InkWell(
-        onTap: widget.onTap,
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(22),
-        splashColor: active.withValues(alpha: 0.08),
-        highlightColor: active.withValues(alpha: 0.05),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ScaleTransition(
-              scale: _scale,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(scale: animation, child: child),
-                  );
-                },
-                child: Icon(
-                  widget.selected ? widget.item.activeIcon : widget.item.icon,
-                  key: ValueKey('${widget.item.label}-${widget.selected}'),
-                  color: color,
-                  size: 24,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(22),
+          splashColor: active.withValues(alpha: 0.08),
+          highlightColor: active.withValues(alpha: 0.05),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ScaleTransition(
+                  scale: _scale,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(scale: animation, child: child),
+                      );
+                    },
+                    child: Icon(
+                      widget.selected
+                          ? widget.item.activeIcon
+                          : widget.item.icon,
+                      key: ValueKey('${widget.item.label}-${widget.selected}'),
+                      color: color,
+                      size: widget.selected ? 26 : 22,
+                    ),
+                  ),
                 ),
-              ),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) {
+                    return SizeTransition(
+                      sizeFactor: animation,
+                      axisAlignment: -1,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  child: widget.selected
+                      ? const SizedBox(
+                          key: ValueKey('selected-no-label'),
+                          height: 0,
+                        )
+                      : Padding(
+                          key: ValueKey('label-${widget.item.label}'),
+                          padding: const EdgeInsets.only(top: 4),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 14,
+                            child: Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  label,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.visible,
+                                  style: TextStyle(
+                                    fontSize: 9.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: color,
+                                    letterSpacing: 0.05,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
-              style: TextStyle(
-                fontSize: widget.selected ? 11.2 : 10.4,
-                fontWeight: widget.selected ? FontWeight.w800 : FontWeight.w600,
-                color: color,
-                letterSpacing: 0.1,
-              ),
-              child: Text(
-                widget.item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -276,11 +325,13 @@ class _AdminNavDestinationState extends State<_AdminNavDestination>
 
 class _AdminNavItem {
   final String label;
+  final String shortLabel;
   final IconData icon;
   final IconData activeIcon;
 
   const _AdminNavItem({
     required this.label,
+    required this.shortLabel,
     required this.icon,
     required this.activeIcon,
   });

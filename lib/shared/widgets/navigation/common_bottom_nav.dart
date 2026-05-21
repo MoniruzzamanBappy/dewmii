@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:dewmii/core/theme/theme_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_theme_palette.dart';
+import '../../../core/theme/theme_controller.dart';
 
 class NavItem {
   final IconData icon;
@@ -67,7 +67,6 @@ class CommonBottomNav extends StatelessWidget {
     onTap(index);
   }
 
-  @override
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AppThemeVariant>(
@@ -212,8 +211,8 @@ class _NavDestinationState extends State<_NavDestination>
     );
 
     _scale = Tween<double>(
-      begin: 0.92,
-      end: 1.08,
+      begin: 0.94,
+      end: 1.10,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     if (widget.selected) {
@@ -250,52 +249,88 @@ class _NavDestinationState extends State<_NavDestination>
       selected: widget.selected,
       button: true,
       label: widget.item.label,
-      child: InkWell(
-        onTap: widget.onTap,
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(22),
-        splashColor: active.withValues(alpha: 0.08),
-        highlightColor: active.withValues(alpha: 0.05),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ScaleTransition(
-              scale: _scale,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(scale: animation, child: child),
-                  );
-                },
-                child: _BadgedIcon(
-                  key: ValueKey(widget.selected),
-                  icon: widget.selected
-                      ? widget.item.selectedIcon
-                      : widget.item.icon,
-                  color: color,
-                  badge: widget.badge,
-                  palette: widget.palette,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(22),
+          splashColor: active.withValues(alpha: 0.08),
+          highlightColor: active.withValues(alpha: 0.05),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ScaleTransition(
+                  scale: _scale,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: ScaleTransition(scale: animation, child: child),
+                      );
+                    },
+                    child: _BadgedIcon(
+                      key: ValueKey('${widget.item.label}-${widget.selected}'),
+                      icon: widget.selected
+                          ? widget.item.selectedIcon
+                          : widget.item.icon,
+                      color: color,
+                      badge: widget.badge,
+                      palette: widget.palette,
+                      selected: widget.selected,
+                    ),
+                  ),
                 ),
-              ),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) {
+                    return SizeTransition(
+                      sizeFactor: animation,
+                      axisAlignment: -1,
+                      child: FadeTransition(opacity: animation, child: child),
+                    );
+                  },
+                  child: widget.selected
+                      ? const SizedBox(
+                          key: ValueKey('selected-no-label'),
+                          height: 0,
+                        )
+                      : Padding(
+                          key: ValueKey('label-${widget.item.label}'),
+                          padding: const EdgeInsets.only(top: 4),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 14,
+                            child: Center(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  widget.item.label,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.visible,
+                                  style: TextStyle(
+                                    fontSize: 9.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: color,
+                                    letterSpacing: 0.05,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 220),
-              curve: Curves.easeOut,
-              style: TextStyle(
-                fontSize: widget.selected ? 11.2 : 10.4,
-                fontWeight: widget.selected ? FontWeight.w800 : FontWeight.w600,
-                color: color,
-                letterSpacing: 0.1,
-              ),
-              child: Text(
-                widget.item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -307,6 +342,7 @@ class _BadgedIcon extends StatelessWidget {
   final Color color;
   final int? badge;
   final AppThemePalette palette;
+  final bool selected;
 
   const _BadgedIcon({
     super.key,
@@ -314,6 +350,7 @@ class _BadgedIcon extends StatelessWidget {
     required this.color,
     required this.badge,
     required this.palette,
+    required this.selected,
   });
 
   @override
@@ -321,7 +358,7 @@ class _BadgedIcon extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Icon(icon, color: color, size: 24),
+        Icon(icon, color: color, size: selected ? 26 : 22),
         if (badge != null)
           Positioned(
             top: -6,
@@ -381,7 +418,9 @@ class _BadgeShell extends StatelessWidget {
       tween: Tween(begin: 0.3, end: 1),
       duration: const Duration(milliseconds: 320),
       curve: Curves.elasticOut,
-      builder: (_, scale, child) => Transform.scale(scale: scale, child: child),
+      builder: (_, scale, child) {
+        return Transform.scale(scale: scale, child: child);
+      },
       child: Container(
         padding: background == null
             ? EdgeInsets.zero
